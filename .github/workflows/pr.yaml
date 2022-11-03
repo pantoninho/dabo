@@ -1,4 +1,4 @@
-name: Pull Request
+name: Pull Request CI
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   test:
-    name: Foundry project
+    name: Pull Request Test 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
