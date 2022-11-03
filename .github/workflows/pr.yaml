@@ -24,8 +24,13 @@ jobs:
 
       - name: Generate coverage report
         run: forge coverage --report lcov
+      
+      - uses: danielealbano/lcov-action@v1
+        with:
+          output_lcov_info: coverage.info
+          remove_patterns: test,script,lib
 
       - uses: romeovs/lcov-reporter-action@v0.2.16
         with:
-          lcov-file: ./lcov.info
+          lcov-file: ./coverage.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
