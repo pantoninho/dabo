@@ -6,59 +6,64 @@ Users may open bets about anything and a decentraliatzed group of validators wil
 
 ## **Domain**
 
-DABO is composed by two different actors:
-* **Betters**: place bets by staking ether
+DABO is composed by:
+* **Players**: place bets by staking ether
 * **Validators**: validates bets by staking DAB tokens
+*Proposers: creates betting proposals? by staking tokens? (<-- investigate this idea. will influence tokenomics)*
 
-### **Betters**
-Anyone can place bets on the system. Bets may be placed in a new bet or an existing one.
+### **Players**
+Players create **betting proposals** and place **bets** on existing proposals by staking ether. Winning **bets** makes players eligible to **claim rewards**. Losing **bets** lose their staked ether.
 
-#### **Creating a Bet**
-To create a bet, users needs to provide ether as stake and define the following fields:
+#### **Proposing Bets**
+// TODO: description of a betting proposal? not easy
 
-* **description** (string): the *bet* itself. a string describing what's the bet. *e.g: Who will win the 2022 World Cup?*
-* **bet** (string): your bet. a string describing what you bet on. *e.g Portugal*
-* **closingDate** (date): the deadline for placing bets
-* **validationDate** (date): the date after which the bet may be validated
-* **minimumStake** ?
+##### **Betting Proposal model**
+* **description** (string): the proposal itself. a string describing what's the bet about. *e.g: Who will win the 2022 World Cup?*
+* **closeBetsDate** (date): the deadline for placing bets
+* **validationDate** (date): the date after which the bets may be validated
+* **minimumStake** (uint): minimum stake for a bet *should this be included?*
 
-Creating a bet creates a pool where all the staked ether for this bet will be locked.
+#### **Placing bets**
+Players may place their **bet** in active proposals by staking ether and describing his prediction. Staked ether is held in a pool: the **bet pool**.
 
-#### **Placing in existing bet (is this correct english?)**
-Users may place their bet in an ongoing bet by staking ether. Staked ether will be locked in the bet's pool.
+When the proposal is validated, winners may claim their share of the **bet pool**. The bigger the stake, the bigger the share.
 
-#### **Claiming Prizes**
-If DABO validators reach consensus on a bet outcome, the users who betted on the right answer are eligible to claim their share of the bet pool. Winners who staked more ether are eligible to a bigger share of the pool.
-
-If DABO validators reach consensus that the bet's outcome cannot be validated, all betters may withdraw their share of the pool, although fees will still be collected. This is to deincentivize the creation of hard/impossible to validate bets.
-
-If DABO validators do not reach consensus, fees won't be collected and betters may withdraw their share of the pool. DABO treasury may also cover gas costs of all bets in order to completely refund betters.
-
-#### **Bet Pool Distribution**
-Although winners get the majority of the pool, the staked ether is distributed between 4 entities: 
-* bet winners (bigger stake == bigger share)
-* bet creator (to incentivize bet creation)
-* validators (bigger stake == bigger share)
-* DABO treasury
-
-The share assigned to each entity is defined by DABO's decentralized governance.
+##### **Bet model**
+* **bet** (string): player's bet. a string describing what's the predicted outcome. *e.g Portugal*
+* **value** (uint): ether to stake
 
 ### **Validators**
 Anyone can be a DABO validator by staking DAB tokens. Staking DAB is basically accepting a job offer: you are responsible for validating bets and getting a share of the fees everytime a bet is validated.
 
 #### **Validating Bets**
-Validators receive bets to validate within a deadline defined by governance. To validate a bet, validators select which bet entries are correct. Validators may also mark the bet as unverifiable if they are unable to validate the outcome.
+Validators receive proposals to validate within a deadline defined by governance. To validate a bet, validators select which bets are correct. Validators may also mark the bet as unverifiable if they are unable to validate the outcome.
 
 Not validating within the estipulated timeframe or wrongly validating bets is punished by slashing a portion of the staked DAB tokens.
 
+#### **Claiming**
+If DABO validators reach consensus on a bet outcome, the users who betted on the right outcome are eligible to claim their share of the **bet pool**. Winners who staked more ether are eligible to a bigger share of the pool.
+
+If DABO validators reach consensus that the bet's outcome cannot be validated, all betters may withdraw their share of the pool, although fees will still be collected. This is to deincentivize the creation of hard/impossible to validate proposals.
+
+If DABO validators do not reach consensus, fees won't be collected and betters may withdraw their share of the pool. DABO treasury may also cover gas costs of all bets in order to completely refund betters.
+
+#### **Bet Pool Distribution**
+Although winners get the majority of the pool, the staked ether is distributed between 4 entities: 
+* winners (bigger stake == bigger share)
+* proposer (to incentivize proposal creation)
+* validators (bigger stake == bigger share)
+* DABO treasury
+
+The share assigned to each entity is defined by DABO's decentralized governance.
+
 #### **Validation Process**
 
-* A bet that is ready to be validated is assigned to a random group of validators (**validation round**)
-* A consensus in the **validation round** is reached if at least X% of the random group total staked DAB has validated the same outcome
-* There needs to be at least X consecutive successful **validation rounds** for a bet to be considered **validated**
-* If there X consecutive consensus do not occur within X **validation rounds**, the bet is considered **unvalidated**
-* If the consensus was that the bet was unverifiable, the bet is considered **unverifiable**
-* After the bet is considered **validated**, all validators that validated differently in the **validation rounds** are punished by burning a portion of staked DAB
+* A proposal that is ready to be validated is assigned to a random group of validators (**validation round**)
+* A consensus in the **validation round** is reached if at least X% of the random group total staked DAB has validated the same bets
+* There needs to be at least X consecutive successful **validation rounds** for the proposal to be considered **validated**
+* If there X consecutive consensus do not occur within X **validation rounds**, the proposal is considered **unvalidated**
+* If the consensus was that the bet was unverifiable, the proposal is considered **unverifiable**
+* After the proposal is considered **validated**, all validators that validated differently in the **validation rounds** are punished by burning a portion of staked DAB
 
 ## **Tokenomics**
 **DAB** is a ERC20 token that is used for governance and validating bets. It acts as shares in the DABO.
@@ -74,7 +79,6 @@ The **DABO** is only open for bets if there are at least X active validators wit
 A curious consequence from these tokenomics is that if the DABO is failing and everyone sells their share, the price of the **DAB** may be redefined and DABO may ressurect with a different group of people.
 
 TODO: supply
-
 
 ## **Software Architecture**
 
@@ -97,14 +101,16 @@ This is the smart contract that players mostly interact with. It is responsible 
 
 ##### **State**
 * `DABets bets`: bet catalogue
-* `mapping(uint => uint) betStakes`: total stakes per bet
+* `mapping(uint => string[])`: bets per proposal
+* `mapping(uint => uint) betPools`: total staked ether per proposal
 * `mapping(address => mapping(uint => uint)) playerStakes`: stakes per placed bet per address
 * `uint minStake`: minimum stake to create and place a bet
 
 ##### **API**
-* `placeBet(string description, string bet, placeBetDeadline, uint256 validationDate) => uint betId`
-* `placeBet(uint betId, string bet) => uint betId`
-* `claimPrize(uint betId)`
+* `propose(string description, uint betsClosedDate, uint validationDate) => uint proposalId`
+* `payable propose(string description, uint betsClosedDate, uint validationDate, string bet) => uint proposalId`
+* `payable place(string bet, uint proposalId)`
+* `claimRewards(uint proposalId)`
 
 #### **DABets**
 This smart contracts acts as the bet catalogue. It allows `DABookie` to create new bets but is read-only to any other caller. It is responsible for:

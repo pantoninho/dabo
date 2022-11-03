@@ -83,8 +83,8 @@ contract DABookieTest is Test {
         _mockBetCreation(fakeId, placeBetDeadline);
 
         vm.warp(when);
-        _createPlacedBet(fakeId, player1, player1Bet, player1Stake);
-        _createPlacedBet(fakeId, player2, player2Bet, player2Stake);
+        _placeBet(fakeId, player1, player1Bet, player1Stake);
+        _placeBet(fakeId, player2, player2Bet, player2Stake);
 
         // total bookie balance should be the sum of the two stakes
         assertEq(
@@ -134,8 +134,8 @@ contract DABookieTest is Test {
         _mockBetCreation(fakeId, placeBetDeadline);
 
         vm.warp(when);
-        _createPlacedBet(fakeId, player1, bet, player1Stake);
-        _createPlacedBet(fakeId, player2, bet, player2Stake);
+        _placeBet(fakeId, player1, bet, player1Stake);
+        _placeBet(fakeId, player2, bet, player2Stake);
 
         // total bookie balance should be the sum of the two stakes
         assertEq(
@@ -166,7 +166,7 @@ contract DABookieTest is Test {
         uint256 stake
     ) public assumeValidAddress(player) assumeSufficientStake(stake) {
         vm.expectRevert(BetNotFound.selector);
-        _createPlacedBet(id, player, bet, stake);
+        _placeBet(id, player, bet, stake);
     }
 
     function testPlaceBetInsufficientStake(
@@ -180,7 +180,7 @@ contract DABookieTest is Test {
         _mockBetCreation(fakeId, 1000);
 
         vm.expectRevert(InsufficientStake.selector);
-        _createPlacedBet(fakeId, player, bet, stake);
+        _placeBet(fakeId, player, bet, stake);
     }
 
     function testPlaceBetClosed(
@@ -197,12 +197,68 @@ contract DABookieTest is Test {
 
         vm.warp(when);
         vm.expectRevert(ClosedBets.selector);
-        _createPlacedBet(fakeId, player, bet, stake);
+        _placeBet(fakeId, player, bet, stake);
+    }
+
+    function testClaimPrizeUnvalidated() public {
+        _mockBetCreation(10, 1000);
+        vm.prank(address(11));
+
+        vm.expectRevert(BetNotValidated.selector);
+        bookie.claimPrize(10);
+    }
+
+    function testClaimPrizeSingleWinner() public {
+        string[] memory validBets = new string[](1);
+        validBets[0] = "winner";
+        _mockBetCreation(10, 1000, true, validBets);
+        vm.warp(0);
+
+        _placeBet(10, address(11), "winner", 1 ether);
+        _placeBet(10, address(12), "loser", 1 ether);
+        _placeBet(10, address(13), "loser", 1 ether);
+
+        vm.prank(address(11));
+        bookie.claimPrize(10);
+
+        assertEq(address(11).balance, 3 ether);
+    }
+
+    function testClaimPrizeMultipleWinners() public {
+        string[] memory validBets = new string[](1);
+        validBets[0] = "winner";
+        _mockBetCreation(10, 1000, true, validBets);
+        vm.warp(0);
+
+        _placeBet(10, address(11), "winner", 1 ether);
+        _placeBet(10, address(12), "winner", 2 ether);
+        _placeBet(10, address(13), "loser", 1 ether);
+
+        vm.prank(address(11));
+        bookie.claimPrize(10);
+
+        vm.prank(address(12));
+        bookie.claimPrize(10);
+
+        assertApproxEqAbs(address(11).balance, 1.3 ether, 0.1 ether);
+        assertApproxEqAbs(address(12).balance, 2.6 ether, 0.1 ether);
+
+        emit log_uint(address(12).balance);
     }
 
     function _mockBetCreation(uint256 fakeId, uint256 placeBetDeadline)
         internal
     {
+        string[] memory validBets;
+        _mockBetCreation(fakeId, placeBetDeadline, false, validBets);
+    }
+
+    function _mockBetCreation(
+        uint256 fakeId,
+        uint256 placeBetDeadline,
+        bool validated,
+        string[] memory validBets
+    ) internal {
         vm.assume(placeBetDeadline < type(uint128).max); // prevent various types of overflow in fuzzy tests
 
         vm.mockCall(
@@ -214,6 +270,8 @@ contract DABookieTest is Test {
         DABCatalogue.Bet memory _bet;
         _bet.placeBetDeadline = placeBetDeadline;
         _bet.validationDate = placeBetDeadline + 100;
+        _bet.validated = validated;
+        _bet.validBets = validBets;
 
         vm.mockCall(
             address(bets),
@@ -222,7 +280,7 @@ contract DABookieTest is Test {
         );
     }
 
-    function _createPlacedBet(
+    function _placeBet(
         uint256 betId,
         address player,
         string memory bet,

@@ -62,23 +62,9 @@ contract DABookie {
     }
 
     function claimPrize(uint256 id) external ensureBetIsValidated(id) {
-        DABCatalogue.Bet memory bet = bets.get(id);
-        uint256 totalStake = betStakes[id];
-        uint256 totalWinningStake = 0;
-        uint256 playerWinningStakes = 0;
-
-        for (uint256 i = 0; i < bet.validBets.length; i++) {
-            string memory validBet = bet.validBets[i];
-            uint256 placedBetId = _placedBetId(id, validBet);
-            totalWinningStake += placedBetsStakes[placedBetId];
-            playerWinningStakes += playerStakes[msg.sender][placedBetId];
-            playerStakes[msg.sender][placedBetId] = 0;
-        }
-
-        uint256 winningShare = (totalStake * playerWinningStakes) /
-            totalWinningStake;
-
-        (bool success, ) = msg.sender.call{value: winningShare}("");
+        (bool success, ) = msg.sender.call{
+            value: _calculatePrize(msg.sender, id)
+        }("");
 
         if (!success) {
             revert PrizeTransferUnsuccessful();
@@ -119,6 +105,29 @@ contract DABookie {
         betStakes[betId] += msg.value; // increment total stakes associated with this bet
         placedBetsStakes[placedBetId] += msg.value; // increment stakes associated with this placed bet
         playerStakes[msg.sender][placedBetId] += msg.value; // increment stakes of the player in this placed bet
+    }
+
+    function _calculatePrize(address player, uint256 betId)
+        internal
+        returns (uint256)
+    {
+        DABCatalogue.Bet memory bet = bets.get(betId);
+        uint256 totalStake = betStakes[betId];
+        uint256 totalWinningStake = 0;
+        uint256 playerWinningStakes = 0;
+
+        for (uint256 i = 0; i < bet.validBets.length; i++) {
+            string memory validBet = bet.validBets[i];
+            uint256 placedBetId = _placedBetId(betId, validBet);
+            totalWinningStake += placedBetsStakes[placedBetId];
+            playerWinningStakes += playerStakes[player][placedBetId];
+            playerStakes[player][placedBetId] = 0;
+        }
+
+        uint256 winningShare = (totalStake * playerWinningStakes) /
+            totalWinningStake;
+
+        return winningShare;
     }
 
     function _placedBetId(uint256 betId, string memory bet)
