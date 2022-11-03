@@ -15,6 +15,20 @@ contract DABOBetsTest is Test {
         _;
     }
 
+    modifier assumeSufficientStake(address better, uint256 stake) {
+        deal(better, stake);
+        vm.assume(stake > bets.minStake());
+        _;
+    }
+
+    modifier assumeValidDates(
+        uint256 placeBetDeadline,
+        uint256 validationDate
+    ) {
+        vm.assume(validationDate >= placeBetDeadline);
+        _;
+    }
+
     function setUp() public {
         bets = new DABOBets();
     }
@@ -26,10 +40,13 @@ contract DABOBetsTest is Test {
         uint256 placeBetDeadline,
         uint256 validationDate,
         uint256 stake
-    ) public assumeValidAddress(creator) {
-        deal(creator, stake);
+    )
+        public
+        assumeValidAddress(creator)
+        assumeSufficientStake(creator, stake)
+        assumeValidDates(placeBetDeadline, validationDate)
+    {
         vm.prank(creator);
-        vm.assume(validationDate >= placeBetDeadline);
 
         bets.create{value: stake}(
             description,
@@ -41,17 +58,29 @@ contract DABOBetsTest is Test {
         assertEq(address(bets).balance, stake);
     }
 
-    function testCreateBetWithoutStake(
+    function testCreateBetInsufficientStake(
         address creator,
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
         uint256 placeBetDeadline,
-        uint256 validationDate
-    ) public assumeValidAddress(creator) {
+        uint256 validationDate,
+        uint256 stake
+    )
+        public
+        assumeValidAddress(creator)
+        assumeValidDates(placeBetDeadline, validationDate)
+    {
+        vm.assume(stake < bets.minStake());
+
+        deal(creator, stake);
         vm.prank(creator);
-        vm.assume(validationDate >= placeBetDeadline);
-        vm.expectRevert(DABOBets.NotEnoughStake.selector);
-        bets.create(description, bet, placeBetDeadline, validationDate);
+        vm.expectRevert(DABOBets.InsufficientStake.selector);
+        bets.create{value: stake}(
+            description,
+            bet,
+            placeBetDeadline,
+            validationDate
+        );
     }
 
     function testCreateBetInvalidDates(
@@ -59,11 +88,17 @@ contract DABOBetsTest is Test {
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
         uint256 placeBetDeadline,
-        uint256 validationDate
-    ) public assumeValidAddress(creator) {
+        uint256 validationDate,
+        uint256 stake
+    ) public assumeValidAddress(creator) assumeSufficientStake(creator, stake) {
         vm.prank(creator);
         vm.assume(validationDate < placeBetDeadline);
         vm.expectRevert(DABOBets.InvalidDates.selector);
-        bets.create(description, bet, placeBetDeadline, validationDate);
+        bets.create{value: stake}(
+            description,
+            bet,
+            placeBetDeadline,
+            validationDate
+        );
     }
 }

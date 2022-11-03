@@ -30,19 +30,25 @@ contract DABOBets {
     }
 
     mapping(uint256 => Bet) betsById;
+    uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
 
     error ClosedBets();
-    error NotEnoughStake();
+    error InsufficientStake();
     error InvalidDates();
+
+    modifier ensureEnoughStake() {
+        if (msg.value < minStake) {
+            revert InsufficientStake();
+        }
+        _;
+    }
 
     function create(
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
         uint256 placeBetDeadline,
         uint256 validationDate
-    ) external payable returns (uint256) {
-        // TODO: minimum stake
-
+    ) external payable ensureEnoughStake returns (uint256) {
         if (placeBetDeadline > validationDate) {
             revert InvalidDates();
         }
