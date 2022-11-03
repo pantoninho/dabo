@@ -24,8 +24,14 @@ jobs:
 
       - name: Generate coverage report
         run: forge coverage --report lcov
+
+      - name: Filter coverage report
+        run: |
+          apt update
+          apt -y install lcov
+          lcov --remove ./lcov.info -o ./lcov.info.pruned 'lib' 'script' 'test'
       
       - uses: romeovs/lcov-reporter-action@v0.2.16
         with:
-          lcov-file: ./lcov.info
+          lcov-file: ./lcov.info.pruned
           github-token: ${{ secrets.GITHUB_TOKEN }}

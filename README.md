@@ -60,18 +60,7 @@ Not validating within the estipulated timeframe or wrongly validating bets is pu
 * If the consensus was that the bet was unverifiable, the bet is considered **unverifiable**
 * After the bet is considered **validated**, all validators that validated differently in the **validation rounds** are punished by burning a portion of staked DAB
 
-### **DABO Treasury**
-The treasury is the entity that manages **DAB** tokens and holds the value of the DABO. It is responsible for minting and burning tokens and maintaining the price of each **DAB**. It is also reponsible for holding staked **DAB**s and claimable rewards.
-
-A share of each bet fee is always sent to the treasury.
-
-### **DAB Office**?
-The office is the entity that manages validators. Validators may get a list of pending validations and act upon them by interacting with the office contract.
-
-It is responsible for managing the validation process for each bet and collecting the fees. Office communicates with the treasury to transfer fees and request slashes to staked **DAB**.
-
 ## **Tokenomics**
-
 **DAB** is a ERC20 token that is used for governance and validating bets. It acts as shares in the DABO.
 
 **DAB** tokens may be purchased and sold for **ETH** through the DABO treasury.
@@ -91,5 +80,41 @@ TODO: supply
 
 ### **Smart Contracts**
 #### **DAB**
+TODO: description
+TODO: state
+TODO: API
+
 #### **DABOTreasury**
-#### **DABOffice**
+TODO: description
+TODO: state
+TODO: API
+
+#### **DABookie**
+This is the smart contract that players mostly interact with. It is responsible for:
+* creating and placing bets
+* holding player stakes
+* transfering winning shares to prize claimers
+
+##### **State**
+* `DABets bets`: bet catalogue
+* `mapping(uint => uint) betStakes`: total stakes per bet
+* `mapping(address => mapping(uint => uint)) playerStakes`: stakes per placed bet per address
+* `uint minStake`: minimum stake to create and place a bet
+
+##### **API**
+* `placeBet(string description, string bet, placeBetDeadline, uint256 validationDate) => uint betId`
+* `placeBet(uint betId, string bet) => uint betId`
+* `claimPrize(uint betId)`
+
+#### **DABets**
+This smart contracts acts as the bet catalogue. It allows `DABookie` to create new bets but is read-only to any other caller. It is responsible for:
+* adding bets from `DABookie` to the catalogue
+* getting bet details
+
+##### **State**
+* `DABookie bookie`: bet bookie
+* `mapping(uint => Bet) bets`: bet catalogue
+
+##### **API**
+* `create(Bet bet) => uint`
+* `get(uint id) => Bet`
