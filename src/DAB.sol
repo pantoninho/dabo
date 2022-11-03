@@ -5,7 +5,7 @@ import "openzeppelin/token/ERC20/ERC20.sol";
 import "./DABOTreasury.sol";
 
 /**
- * @author  @xerife
+ * @author  0xerife
  * @title   DABO Token (DAB)
  * @notice  TODO: write this
  */

@@ -5,7 +5,7 @@ import "./DAB.sol";
 
 // TODO: is there some kind of standard for this type of contract? check ERC4646
 /**
- * @author  @xerife
+ * @author  0xerife
  * @title   DABO Treasury
  * @notice  TODO: write this
  */

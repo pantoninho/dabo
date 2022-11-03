@@ -7,7 +7,7 @@ import "./Errors.sol";
 import "forge-std/console2.sol";
 
 /**
- * @author  @xerife
+ * @author  0xerife
  * @title   Decentralized Autonomous Bookie
  * @notice  TODO: write this
  */

@@ -5,7 +5,7 @@ import "./DABookie.sol";
 import "./Errors.sol";
 
 /**
- * @author  @xerife
+ * @author  0xerife
  * @title   Decentralized Autonomous Bet Catalogue
  * @dev     .
  * @notice  .
