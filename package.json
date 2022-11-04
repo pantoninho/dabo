@@ -1,0 +1,19 @@
+{
+  "name": "dabo",
+  "version": "0.0.0",
+  "description": "DABO validates bets in return for a fee.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pantoninho/dabo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pantoninho/dabo/issues"
+  },
+  "homepage": "https://github.com/pantoninho/dabo#readme",
+  "devDependencies": {
+    "@changesets/cli": "^2.25.2"
+  }
+}
