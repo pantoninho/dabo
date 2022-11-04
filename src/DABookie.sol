@@ -51,8 +51,6 @@ contract DABookie {
             readyForValidationAt
         );
         _placeBet(proposalId, msg.sender, bet, msg.value);
-
-        return proposalId;
     }
 
     function placeBet(uint256 proposalId, string calldata bet)
@@ -138,7 +136,6 @@ contract DABookie {
     {
         betId = bets.placeBet(proposalId, player, bet, stake);
         betsToClaim[player].set(betId, proposalId);
-        return betId;
     }
 
     modifier ensureEnoughStake(uint256 stake) {
@@ -166,15 +163,6 @@ contract DABookie {
         if (!bets.getProposal(proposalId).validated) {
             revert ProposalNotValidated();
         }
-        _;
-    }
-
-    modifier ensureRewardsNotClaimed(uint256 proposalId) {
-        /*
-        if (claimed[proposalId][msg.sender]) {
-            revert RewardsAlreadyClaimed();
-        }
-        */
         _;
     }
 }

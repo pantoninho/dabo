@@ -64,6 +64,20 @@ contract DABookieTest is Test {
         assertEq(address(bookie).balance, stake);
     }
 
+    function testCreateProposalWithInvalidDates(
+        address creator,
+        uint256 stake,
+        uint256 betsClosedAt,
+        uint256 readyForValidationAt
+    ) public assumeValidAddress(creator) assumeSufficientStake(stake) {
+        vm.assume(betsClosedAt > readyForValidationAt);
+
+        hoax(creator, stake);
+        vm.warp(betsClosedAt);
+        vm.expectRevert(InvalidDates.selector);
+        bookie.propose("", betsClosedAt, readyForValidationAt);
+    }
+
     function testCreateProposalWithBetInsufficientStake(
         address creator,
         uint256 stake
@@ -236,6 +250,36 @@ contract DABookieTest is Test {
         vm.prank(player);
         bookie.claimRewards();
         assertEq(address(player).balance, 0);
+    }
+
+    function testClaimRewardsNoFunds(
+        uint256 proposalId,
+        address player,
+        string memory bet,
+        uint64 stake,
+        uint256 betsClosedAt,
+        uint256 when
+    ) public assumeValidAddress(player) assumeSufficientStake(stake) {
+        vm.assume(when < betsClosedAt);
+        _mockProposal(proposalId, betsClosedAt, true);
+
+        vm.warp(when);
+        uint256 betId = _placeBet(proposalId, player, bet, stake);
+        uint256 reward = uint256(stake) * 2;
+
+        vm.mockCall(
+            address(bets),
+            abi.encodeWithSelector(
+                DABets.calculateRewards.selector,
+                player,
+                betId
+            ),
+            abi.encode(reward)
+        );
+
+        vm.prank(player);
+        vm.expectRevert(RewardsTransferUnsuccessful.selector);
+        bookie.claimRewards();
     }
 
     function _mockProposal(uint256 fakeId, uint256 betsClosedAt) internal {
