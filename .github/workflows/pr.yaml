@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt -y install lcov
-          lcov --remove ./lcov.info -o ./lcov.info.pruned 'lib' 'script' 'test'
+          lcov --remove ./lcov.info 'lib/*' 'script/*' 'test/*' -o ./lcov.info.pruned
       
       - uses: romeovs/lcov-reporter-action@v0.2.16
         with:
