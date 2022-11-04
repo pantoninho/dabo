@@ -2,11 +2,12 @@
 pragma solidity ^0.8.17;
 
 error Unauthorized();
-error BetNotFound();
+error ProposalNotFound();
 error DuplicateBet();
 error ClosedBets();
 error InsufficientStake();
 error InvalidDates();
 error InvalidAddress();
-error BetNotValidated();
+error ProposalNotValidated();
 error RewardsTransferUnsuccessful();
+error RewardsAlreadyClaimed();

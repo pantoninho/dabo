@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "openzeppelin/utils/structs/EnumerableMap.sol";
 import "./DABets.sol";
 import "./Errors.sol";
 
@@ -12,12 +13,12 @@ import "forge-std/console2.sol";
  * @notice  TODO: write this
  */
 contract DABookie {
+    using EnumerableMap for EnumerableMap.UintToUintMap;
+
     DABets public bets;
     uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
-    mapping(uint256 => uint256) betPools;
-    mapping(uint256 => string[]) placedBets;
-    mapping(uint256 => uint256) placedBetsStakes;
-    mapping(address => mapping(uint256 => uint256)) playerStakes;
+    // address => betId => proposalId
+    mapping(address => EnumerableMap.UintToUintMap) betsToClaim;
 
     constructor() {
         bets = new DABets(this);
@@ -57,42 +58,49 @@ contract DABookie {
     function placeBet(uint256 proposalId, string calldata bet)
         external
         payable
+        returns (uint256 betId)
     {
-        _placeBet(proposalId, msg.sender, bet, msg.value);
+        return _placeBet(proposalId, msg.sender, bet, msg.value);
     }
 
-    function claimRewards(uint256 id) external ensureBetIsValidated(id) {
-        (bool success, ) = msg.sender.call{
-            value: _calculateRewards(msg.sender, id)
-        }("");
+    function claimRewards() external {
+        uint256 totalRewards = 0;
+        uint256 numberOfBetsToClaim = betsToClaim[msg.sender].length();
+        uint256[] memory betIds = new uint256[](numberOfBetsToClaim);
+
+        for (uint256 i = 0; i < numberOfBetsToClaim; i++) {
+            (uint256 betId, uint256 proposalId) = betsToClaim[msg.sender].at(i);
+
+            totalRewards += bets.getProposal(proposalId).validated
+                ? bets.calculateRewards(msg.sender, betId)
+                : 0;
+
+            betIds[i] = betId;
+        }
+
+        // todo: hmmm..
+        for (uint256 i = 0; i < numberOfBetsToClaim; i++) {
+            betsToClaim[msg.sender].remove(betIds[i]);
+        }
+
+        (bool success, ) = msg.sender.call{value: totalRewards}("");
 
         if (!success) {
             revert RewardsTransferUnsuccessful();
         }
     }
 
-    function getBetPool(uint256 proposalId)
-        external
-        view
-        returns (uint256 stake)
-    {
-        return betPools[proposalId];
-    }
+    function getActiveBets() external view returns (uint256[] memory betIds) {
+        uint256 numberOfActiveBets = betsToClaim[msg.sender].length();
 
-    function getPlacedBetStake(uint256 proposalId, string calldata bet)
-        external
-        view
-        returns (uint256 stake)
-    {
-        return placedBetsStakes[_placedBetId(proposalId, bet)];
-    }
+        betIds = new uint256[](numberOfActiveBets);
 
-    function getPlayerStake(
-        address player,
-        uint256 proposalId,
-        string calldata bet
-    ) external view returns (uint256 stake) {
-        return playerStakes[player][_placedBetId(proposalId, bet)];
+        for (uint256 i = 0; i < numberOfActiveBets; i++) {
+            (uint256 betId, ) = betsToClaim[msg.sender].at(0);
+            betIds[i] = betId;
+        }
+
+        return betIds;
     }
 
     function _propose(
@@ -111,7 +119,7 @@ contract DABookie {
         proposal.betsClosedAt = betsClosedAt;
         proposal.readyForValidationAt = readyForValidationAt;
 
-        proposalId = bets.create(proposal);
+        proposalId = bets.addProposal(proposal);
 
         return proposalId;
     }
@@ -126,51 +134,11 @@ contract DABookie {
         ensureValidAddress(player)
         ensureEnoughStake(stake)
         ensureBetsAreOpen(proposalId)
+        returns (uint256 betId)
     {
-        // generate placed bet id to uniquely identify a placed bet inside a bet
-        uint256 placedBetId = _placedBetId(proposalId, bet);
-        // check if some already placed the exact same bet
-        bool exists = placedBetsStakes[placedBetId] > 0;
-
-        // if not, add it to list of placed bets for this bet
-        if (!exists) {
-            placedBets[proposalId].push(bet);
-        }
-
-        betPools[proposalId] += stake; // increment total stakes associated with this bet
-        placedBetsStakes[placedBetId] += stake; // increment stakes associated with this placed bet
-        playerStakes[player][placedBetId] += stake; // increment stakes of the player in this placed bet
-    }
-
-    function _calculateRewards(address player, uint256 proposalId)
-        internal
-        returns (uint256)
-    {
-        DABets.Proposal memory bet = bets.get(proposalId);
-        uint256 totalStake = betPools[proposalId];
-        uint256 totalWinningStake = 0;
-        uint256 playerWinningStakes = 0;
-
-        for (uint256 i = 0; i < bet.validBets.length; i++) {
-            string memory validBet = bet.validBets[i];
-            uint256 placedBetId = _placedBetId(proposalId, validBet);
-            totalWinningStake += placedBetsStakes[placedBetId];
-            playerWinningStakes += playerStakes[player][placedBetId];
-            playerStakes[player][placedBetId] = 0;
-        }
-
-        uint256 winningShare = (totalStake * playerWinningStakes) /
-            totalWinningStake;
-
-        return winningShare;
-    }
-
-    function _placedBetId(uint256 proposalId, string memory bet)
-        internal
-        pure
-        returns (uint256 id)
-    {
-        return uint256(keccak256(abi.encodePacked(proposalId, bet)));
+        betId = bets.placeBet(proposalId, player, bet, stake);
+        betsToClaim[player].set(betId, proposalId);
+        return betId;
     }
 
     modifier ensureEnoughStake(uint256 stake) {
@@ -187,17 +155,26 @@ contract DABookie {
         _;
     }
 
-    modifier ensureBetsAreOpen(uint256 id) {
-        if (block.timestamp > bets.get(id).betsClosedAt) {
+    modifier ensureBetsAreOpen(uint256 proposalId) {
+        if (block.timestamp > bets.getProposal(proposalId).betsClosedAt) {
             revert ClosedBets();
         }
         _;
     }
 
-    modifier ensureBetIsValidated(uint256 id) {
-        if (!bets.get(id).validated) {
-            revert BetNotValidated();
+    modifier ensureProposalIsValidated(uint256 proposalId) {
+        if (!bets.getProposal(proposalId).validated) {
+            revert ProposalNotValidated();
         }
+        _;
+    }
+
+    modifier ensureRewardsNotClaimed(uint256 proposalId) {
+        /*
+        if (claimed[proposalId][msg.sender]) {
+            revert RewardsAlreadyClaimed();
+        }
+        */
         _;
     }
 }
