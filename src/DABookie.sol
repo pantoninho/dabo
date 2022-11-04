@@ -23,42 +23,42 @@ contract DABookie {
         bets = new DABets(this);
     }
 
-    function create(
+    function propose(
+        string calldata description, // TODO: calldata or memory?
+        uint256 betsClosedAt,
+        uint256 readyForValidationAt
+    ) external returns (uint256 proposalId) {
+        return
+            _propose(
+                msg.sender,
+                description,
+                betsClosedAt,
+                readyForValidationAt
+            );
+    }
+
+    function propose(
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
         uint256 betsClosedAt,
         uint256 readyForValidationAt
-    )
-        external
-        payable
-        ensureValidAddress(msg.sender)
-        ensureEnoughStake
-        returns (uint256 proposalId)
-    {
-        if (betsClosedAt > readyForValidationAt) {
-            revert InvalidDates();
-        }
-
-        DABets.Proposal memory _bet;
-        _bet.description = description;
-        _bet.creator = msg.sender;
-        _bet.betsClosedAt = betsClosedAt;
-        _bet.readyForValidationAt = readyForValidationAt;
-
-        proposalId = bets.create(_bet);
-        _placeBet(proposalId, bet);
+    ) external payable returns (uint256 proposalId) {
+        proposalId = _propose(
+            msg.sender,
+            description,
+            betsClosedAt,
+            readyForValidationAt
+        );
+        _placeBet(proposalId, msg.sender, bet, msg.value);
 
         return proposalId;
     }
 
-    function placeBet(uint256 id, string calldata bet)
+    function placeBet(uint256 proposalId, string calldata bet)
         external
         payable
-        ensureValidAddress(msg.sender)
-        ensureBetsAreOpen(id)
-        ensureEnoughStake
     {
-        _placeBet(id, bet);
+        _placeBet(proposalId, msg.sender, bet, msg.value);
     }
 
     function claimPrize(uint256 id) external ensureBetIsValidated(id) {
@@ -71,7 +71,11 @@ contract DABookie {
         }
     }
 
-    function getBetPool(uint256 proposalId) external view returns (uint256 stake) {
+    function getBetPool(uint256 proposalId)
+        external
+        view
+        returns (uint256 stake)
+    {
         return betPools[proposalId];
     }
 
@@ -91,7 +95,38 @@ contract DABookie {
         return playerStakes[player][_placedBetId(proposalId, bet)];
     }
 
-    function _placeBet(uint256 proposalId, string calldata bet) internal {
+    function _propose(
+        address creator,
+        string memory description,
+        uint256 betsClosedAt,
+        uint256 readyForValidationAt
+    ) internal ensureValidAddress(creator) returns (uint256 proposalId) {
+        if (betsClosedAt > readyForValidationAt) {
+            revert InvalidDates();
+        }
+
+        DABets.Proposal memory proposal;
+        proposal.description = description;
+        proposal.creator = msg.sender;
+        proposal.betsClosedAt = betsClosedAt;
+        proposal.readyForValidationAt = readyForValidationAt;
+
+        proposalId = bets.create(proposal);
+
+        return proposalId;
+    }
+
+    function _placeBet(
+        uint256 proposalId,
+        address player,
+        string calldata bet,
+        uint256 stake
+    )
+        internal
+        ensureValidAddress(player)
+        ensureEnoughStake(stake)
+        ensureBetsAreOpen(proposalId)
+    {
         // generate placed bet id to uniquely identify a placed bet inside a bet
         uint256 placedBetId = _placedBetId(proposalId, bet);
         // check if some already placed the exact same bet
@@ -102,9 +137,9 @@ contract DABookie {
             placedBets[proposalId].push(bet);
         }
 
-        betPools[proposalId] += msg.value; // increment total stakes associated with this bet
-        placedBetsStakes[placedBetId] += msg.value; // increment stakes associated with this placed bet
-        playerStakes[msg.sender][placedBetId] += msg.value; // increment stakes of the player in this placed bet
+        betPools[proposalId] += stake; // increment total stakes associated with this bet
+        placedBetsStakes[placedBetId] += stake; // increment stakes associated with this placed bet
+        playerStakes[player][placedBetId] += stake; // increment stakes of the player in this placed bet
     }
 
     function _calculatePrize(address player, uint256 proposalId)
@@ -138,8 +173,8 @@ contract DABookie {
         return uint256(keccak256(abi.encodePacked(proposalId, bet)));
     }
 
-    modifier ensureEnoughStake() {
-        if (msg.value < minStake) {
+    modifier ensureEnoughStake(uint256 stake) {
+        if (stake < minStake) {
             revert InsufficientStake();
         }
         _;

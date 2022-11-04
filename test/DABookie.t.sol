@@ -27,16 +27,19 @@ contract DABookieTest is Test {
         bets = bookie.bets();
     }
 
-    function testCreateBetWithStake(
+    function testCreateProposalWithBetEnoughStake(
         address creator,
         string memory bet,
-        uint256 stake
+        uint256 stake,
+        uint256 betsClosedAt
     ) public assumeValidAddress(creator) assumeSufficientStake(stake) {
+        vm.assume(betsClosedAt > 500); // prevent underflow issues
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, 0);
+        _mockProposal(fakeId, betsClosedAt);
 
         hoax(creator, stake);
-        uint256 id = bookie.create{value: stake}("", bet, 0, 0);
+        vm.warp(betsClosedAt - 100);
+        uint256 id = bookie.propose{value: stake}("", bet, 0, 0);
 
         assertEq(id, fakeId);
         assertEq(address(bookie).balance, stake);
@@ -45,18 +48,18 @@ contract DABookieTest is Test {
         assertEq(bookie.getPlayerStake(creator, id, bet), stake);
     }
 
-    function testCreateBetInsufficientStake(address creator, uint256 stake)
-        public
-        assumeValidAddress(creator)
-    {
+    function testCreatePorposalWithBetInsufficientStake(
+        address creator,
+        uint256 stake
+    ) public assumeValidAddress(creator) {
         vm.assume(stake < bookie.minStake());
 
         hoax(creator, stake);
         vm.expectRevert(InsufficientStake.selector);
-        bookie.create{value: stake}("", "", 0, 100);
+        bookie.propose{value: stake}("", "", 0, 100);
     }
 
-    function testPlaceBetExisting(
+    function testPlaceBetDifferentBets(
         address player1,
         address player2,
         string memory player1Bet,
@@ -80,7 +83,7 @@ contract DABookieTest is Test {
         );
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, betsClosedAt);
+        _mockProposal(fakeId, betsClosedAt);
 
         vm.warp(when);
         _placeBet(fakeId, player1, player1Bet, player1Stake);
@@ -112,7 +115,7 @@ contract DABookieTest is Test {
         );
     }
 
-    function testPlaceBetExistingAndSame(
+    function testPlaceBetSameBets(
         address player1,
         address player2,
         string memory bet,
@@ -131,7 +134,7 @@ contract DABookieTest is Test {
         vm.assume(player1 != player2);
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, betsClosedAt);
+        _mockProposal(fakeId, betsClosedAt);
 
         vm.warp(when);
         _placeBet(fakeId, player1, bet, player1Stake);
@@ -159,7 +162,7 @@ contract DABookieTest is Test {
         assertEq(bookie.getPlayerStake(player2, fakeId, bet), player2Stake);
     }
 
-    function testPlaceBetUnexisting(
+    function testPlaceBetUnexistingProposal(
         uint256 id,
         address player,
         string calldata bet,
@@ -177,7 +180,7 @@ contract DABookieTest is Test {
         vm.assume(stake < bookie.minStake());
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, 1000);
+        _mockProposal(fakeId, 1000);
 
         vm.expectRevert(InsufficientStake.selector);
         _placeBet(fakeId, player, bet, stake);
@@ -193,7 +196,7 @@ contract DABookieTest is Test {
         vm.assume(when > betsClosedAt);
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, betsClosedAt);
+        _mockProposal(fakeId, betsClosedAt);
 
         vm.warp(when);
         vm.expectRevert(ClosedBets.selector);
@@ -201,7 +204,7 @@ contract DABookieTest is Test {
     }
 
     function testClaimPrizeUnvalidated() public {
-        _mockBetCreation(10, 1000);
+        _mockProposal(10, 1000);
         vm.prank(address(11));
 
         vm.expectRevert(BetNotValidated.selector);
@@ -211,7 +214,7 @@ contract DABookieTest is Test {
     function testClaimPrizeSingleWinner() public {
         string[] memory validBets = new string[](1);
         validBets[0] = "winner";
-        _mockBetCreation(10, 1000, true, validBets);
+        _mockProposal(10, 1000, true, validBets);
         vm.warp(0);
 
         _placeBet(10, address(11), "winner", 1 ether);
@@ -227,7 +230,7 @@ contract DABookieTest is Test {
     function testClaimPrizeMultipleWinners() public {
         string[] memory validBets = new string[](1);
         validBets[0] = "winner";
-        _mockBetCreation(10, 1000, true, validBets);
+        _mockProposal(10, 1000, true, validBets);
         vm.warp(0);
 
         _placeBet(10, address(11), "winner", 1 ether);
@@ -246,14 +249,12 @@ contract DABookieTest is Test {
         emit log_uint(address(12).balance);
     }
 
-    function _mockBetCreation(uint256 fakeId, uint256 betsClosedAt)
-        internal
-    {
+    function _mockProposal(uint256 fakeId, uint256 betsClosedAt) internal {
         string[] memory validBets;
-        _mockBetCreation(fakeId, betsClosedAt, false, validBets);
+        _mockProposal(fakeId, betsClosedAt, false, validBets);
     }
 
-    function _mockBetCreation(
+    function _mockProposal(
         uint256 fakeId,
         uint256 betsClosedAt,
         bool validated,
@@ -281,12 +282,12 @@ contract DABookieTest is Test {
     }
 
     function _placeBet(
-        uint256 betId,
+        uint256 proposalId,
         address player,
         string memory bet,
         uint256 stake
     ) internal {
         hoax(player, stake);
-        bookie.placeBet{value: stake}(betId, bet);
+        bookie.placeBet{value: stake}(proposalId, bet);
     }
 }
