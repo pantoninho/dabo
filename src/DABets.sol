@@ -6,24 +6,23 @@ import "./Errors.sol";
 
 /**
  * @author  0xerife
- * @title   Decentralized Autonomous Bet Catalogue
+ * @title   Decentralized Autonomous Proposal Catalogue
  * @dev     .
  * @notice  .
  */
 
-contract DABCatalogue {
-    struct Bet {
-        // TODO: better names for Bet / PlacedBet? looks confusing
+contract DABets {
+    struct Proposal {
         uint256 id;
         string description;
         address creator;
-        uint256 placeBetDeadline;
-        uint256 validationDate;
+        uint256 betsClosedAt;
+        uint256 readyForValidationAt;
         string[] validBets;
         bool validated;
     }
 
-    mapping(uint256 => Bet) bets;
+    mapping(uint256 => Proposal) proposals;
     DABookie bookie;
 
     modifier onlyBookie() {
@@ -34,7 +33,7 @@ contract DABCatalogue {
     }
 
     modifier ensureBetExists(uint256 id) {
-        if (bets[id].creator == address(0)) {
+        if (proposals[id].creator == address(0)) {
             revert BetNotFound();
         }
         _;
@@ -44,11 +43,11 @@ contract DABCatalogue {
         bookie = _bookie;
     }
 
-    function create(Bet memory bet) external onlyBookie returns (uint256 id) {
-        id = uint256(keccak256(abi.encodePacked(bet.description, bet.creator)));
+    function create(Proposal memory proposal) external onlyBookie returns (uint256 id) {
+        id = uint256(keccak256(abi.encodePacked(proposal.description, proposal.creator)));
 
-        bet.id = id;
-        bets[id] = bet;
+        proposal.id = id;
+        proposals[id] = proposal;
 
         return id;
     }
@@ -57,8 +56,8 @@ contract DABCatalogue {
         external
         view
         ensureBetExists(id)
-        returns (Bet memory bet)
+        returns (Proposal memory proposal)
     {
-        return bets[id];
+        return proposals[id];
     }
 }

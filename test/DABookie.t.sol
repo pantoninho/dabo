@@ -3,11 +3,11 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import "../src/DABookie.sol";
-import "../src/DABCatalogue.sol";
+import "../src/DABets.sol";
 
 contract DABookieTest is Test {
     DABookie public bookie;
-    DABCatalogue public bets;
+    DABets public bets;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(0));
@@ -40,7 +40,7 @@ contract DABookieTest is Test {
 
         assertEq(id, fakeId);
         assertEq(address(bookie).balance, stake);
-        assertEq(bookie.getBetStake(id), stake);
+        assertEq(bookie.getBetPool(id), stake);
         assertEq(bookie.getPlacedBetStake(id, bet), stake);
         assertEq(bookie.getPlayerStake(creator, id, bet), stake);
     }
@@ -63,7 +63,7 @@ contract DABookieTest is Test {
         string memory player2Bet,
         uint64 player1Stake,
         uint64 player2Stake,
-        uint256 placeBetDeadline,
+        uint256 betsClosedAt,
         uint256 when
     )
         public
@@ -72,7 +72,7 @@ contract DABookieTest is Test {
         assumeSufficientStake(player1Stake)
         assumeSufficientStake(player2Stake)
     {
-        vm.assume(when < placeBetDeadline);
+        vm.assume(when < betsClosedAt);
         vm.assume(player1 != player2);
         vm.assume(
             keccak256(abi.encodePacked(player1Bet)) !=
@@ -80,7 +80,7 @@ contract DABookieTest is Test {
         );
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, placeBetDeadline);
+        _mockBetCreation(fakeId, betsClosedAt);
 
         vm.warp(when);
         _placeBet(fakeId, player1, player1Bet, player1Stake);
@@ -93,7 +93,7 @@ contract DABookieTest is Test {
         );
         // total bet stake should be the sum of the two stakes
         assertEq(
-            bookie.getBetStake(fakeId),
+            bookie.getBetPool(fakeId),
             uint256(player1Stake) + uint256(player2Stake)
         );
 
@@ -118,7 +118,7 @@ contract DABookieTest is Test {
         string memory bet,
         uint64 player1Stake,
         uint64 player2Stake,
-        uint256 placeBetDeadline,
+        uint256 betsClosedAt,
         uint256 when
     )
         public
@@ -127,11 +127,11 @@ contract DABookieTest is Test {
         assumeSufficientStake(player1Stake)
         assumeSufficientStake(player2Stake)
     {
-        vm.assume(when < placeBetDeadline);
+        vm.assume(when < betsClosedAt);
         vm.assume(player1 != player2);
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, placeBetDeadline);
+        _mockBetCreation(fakeId, betsClosedAt);
 
         vm.warp(when);
         _placeBet(fakeId, player1, bet, player1Stake);
@@ -144,7 +144,7 @@ contract DABookieTest is Test {
         );
         // total bet stake should be the sum of the two stakes
         assertEq(
-            bookie.getBetStake(fakeId),
+            bookie.getBetPool(fakeId),
             uint256(player1Stake) + uint256(player2Stake)
         );
 
@@ -186,14 +186,14 @@ contract DABookieTest is Test {
     function testPlaceBetClosed(
         address player,
         string memory bet,
-        uint128 placeBetDeadline,
+        uint128 betsClosedAt,
         uint64 stake,
         uint256 when
     ) public assumeValidAddress(player) assumeSufficientStake(stake) {
-        vm.assume(when > placeBetDeadline);
+        vm.assume(when > betsClosedAt);
 
         uint256 fakeId = 10;
-        _mockBetCreation(fakeId, placeBetDeadline);
+        _mockBetCreation(fakeId, betsClosedAt);
 
         vm.warp(when);
         vm.expectRevert(ClosedBets.selector);
@@ -246,36 +246,36 @@ contract DABookieTest is Test {
         emit log_uint(address(12).balance);
     }
 
-    function _mockBetCreation(uint256 fakeId, uint256 placeBetDeadline)
+    function _mockBetCreation(uint256 fakeId, uint256 betsClosedAt)
         internal
     {
         string[] memory validBets;
-        _mockBetCreation(fakeId, placeBetDeadline, false, validBets);
+        _mockBetCreation(fakeId, betsClosedAt, false, validBets);
     }
 
     function _mockBetCreation(
         uint256 fakeId,
-        uint256 placeBetDeadline,
+        uint256 betsClosedAt,
         bool validated,
         string[] memory validBets
     ) internal {
-        vm.assume(placeBetDeadline < type(uint128).max); // prevent various types of overflow in fuzzy tests
+        vm.assume(betsClosedAt < type(uint128).max); // prevent various types of overflow in fuzzy tests
 
         vm.mockCall(
             address(bets),
-            abi.encodeWithSelector(DABCatalogue.create.selector),
+            abi.encodeWithSelector(DABets.create.selector),
             abi.encode(fakeId)
         );
 
-        DABCatalogue.Bet memory _bet;
-        _bet.placeBetDeadline = placeBetDeadline;
-        _bet.validationDate = placeBetDeadline + 100;
+        DABets.Proposal memory _bet;
+        _bet.betsClosedAt = betsClosedAt;
+        _bet.readyForValidationAt = betsClosedAt + 100;
         _bet.validated = validated;
         _bet.validBets = validBets;
 
         vm.mockCall(
             address(bets),
-            abi.encodeWithSelector(DABCatalogue.get.selector),
+            abi.encodeWithSelector(DABets.get.selector),
             abi.encode(_bet)
         );
     }

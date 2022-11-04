@@ -20,7 +20,7 @@ Players create **betting proposals** and place **bets** on existing proposals by
 ##### **Betting Proposal model**
 * **description** (string): the proposal itself. a string describing what's the bet about. *e.g: Who will win the 2022 World Cup?*
 * **closeBetsDate** (date): the deadline for placing bets
-* **validationDate** (date): the date after which the bets may be validated
+* **readyForValidationAt** (date): the date after which the bets may be validated
 * **minimumStake** (uint): minimum stake for a bet *should this be included?*
 
 #### **Placing bets**
@@ -107,8 +107,8 @@ This is the smart contract that players mostly interact with. It is responsible 
 * `uint minStake`: minimum stake to create and place a bet
 
 ##### **API**
-* `propose(string description, uint betsClosedDate, uint validationDate) => uint proposalId`
-* `payable propose(string description, uint betsClosedDate, uint validationDate, string bet) => uint proposalId`
+* `propose(string description, uint betsClosedAt, uint readyForValidationAt) => uint proposalId`
+* `payable propose(string description, uint betsClosedAt, uint readyForValidationAt, string bet) => uint proposalId`
 * `payable place(string bet, uint proposalId)`
 * `claimRewards(uint proposalId)`
 
@@ -118,8 +118,8 @@ This smart contracts acts as the bet catalogue. It allows `DABookie` to create n
 * getting bet details
 
 ##### **State**
-* `DABookie bookie`: bet bookie
-* `mapping(uint => Bet) bets`: bet catalogue
+* `DABookie bookie`
+* `mapping(uint => Proposal) proposals`
 
 ##### **API**
 * `create(Bet bet) => uint`
