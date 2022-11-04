@@ -203,15 +203,15 @@ contract DABookieTest is Test {
         _placeBet(fakeId, player, bet, stake);
     }
 
-    function testClaimPrizeUnvalidated() public {
+    function testClaimRewardsUnvalidated() public {
         _mockProposal(10, 1000);
         vm.prank(address(11));
 
         vm.expectRevert(BetNotValidated.selector);
-        bookie.claimPrize(10);
+        bookie.claimRewards(10);
     }
 
-    function testClaimPrizeSingleWinner() public {
+    function testClaimRewardsSingleWinner() public {
         string[] memory validBets = new string[](1);
         validBets[0] = "winner";
         _mockProposal(10, 1000, true, validBets);
@@ -222,12 +222,12 @@ contract DABookieTest is Test {
         _placeBet(10, address(13), "loser", 1 ether);
 
         vm.prank(address(11));
-        bookie.claimPrize(10);
+        bookie.claimRewards(10);
 
         assertEq(address(11).balance, 3 ether);
     }
 
-    function testClaimPrizeMultipleWinners() public {
+    function testClaimRewardsMultipleWinners() public {
         string[] memory validBets = new string[](1);
         validBets[0] = "winner";
         _mockProposal(10, 1000, true, validBets);
@@ -238,10 +238,10 @@ contract DABookieTest is Test {
         _placeBet(10, address(13), "loser", 1 ether);
 
         vm.prank(address(11));
-        bookie.claimPrize(10);
+        bookie.claimRewards(10);
 
         vm.prank(address(12));
-        bookie.claimPrize(10);
+        bookie.claimRewards(10);
 
         assertApproxEqAbs(address(11).balance, 1.3 ether, 0.1 ether);
         assertApproxEqAbs(address(12).balance, 2.6 ether, 0.1 ether);

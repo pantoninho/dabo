@@ -61,13 +61,13 @@ contract DABookie {
         _placeBet(proposalId, msg.sender, bet, msg.value);
     }
 
-    function claimPrize(uint256 id) external ensureBetIsValidated(id) {
+    function claimRewards(uint256 id) external ensureBetIsValidated(id) {
         (bool success, ) = msg.sender.call{
-            value: _calculatePrize(msg.sender, id)
+            value: _calculateRewards(msg.sender, id)
         }("");
 
         if (!success) {
-            revert PrizeTransferUnsuccessful();
+            revert RewardsTransferUnsuccessful();
         }
     }
 
@@ -142,7 +142,7 @@ contract DABookie {
         playerStakes[player][placedBetId] += stake; // increment stakes of the player in this placed bet
     }
 
-    function _calculatePrize(address player, uint256 proposalId)
+    function _calculateRewards(address player, uint256 proposalId)
         internal
         returns (uint256)
     {

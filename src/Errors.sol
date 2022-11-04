@@ -9,4 +9,4 @@ error InsufficientStake();
 error InvalidDates();
 error InvalidAddress();
 error BetNotValidated();
-error PrizeTransferUnsuccessful();
+error RewardsTransferUnsuccessful();

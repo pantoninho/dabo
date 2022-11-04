@@ -97,7 +97,7 @@ TODO: API
 This is the smart contract that players mostly interact with. It is responsible for:
 * creating and placing bets
 * holding player stakes
-* transfering winning shares to prize claimers
+* transfering winning shares to rewards claimers
 
 ##### **State**
 * `DABets bets`: bet catalogue
