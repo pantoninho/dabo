@@ -10,7 +10,7 @@ import "forge-std/console2.sol";
 /**
  * @author  0xerife
  * @title   Decentralized Autonomous Bookie
- * @notice  TODO: write this
+ * @notice  Creates betting proposals and places bets in the exchange for staking eth
  */
 contract DABookie {
     using EnumerableMap for EnumerableMap.UintToUintMap;
@@ -24,6 +24,12 @@ contract DABookie {
         bets = new DABets(this);
     }
 
+    /**
+     * @notice  Creates a betting proposal
+     * @param   description the proposal itself. a string describing the subject of the bet
+     * @param   betsClosedAt unix timestamp (in seconds) after which no more bets will be accepted
+     * @param   readyForValidationAt timestamp (in seconds) after which the proposal may be validated
+     */
     function propose(
         string calldata description, // TODO: calldata or memory?
         uint256 betsClosedAt,
@@ -38,6 +44,14 @@ contract DABookie {
             );
     }
 
+    /**
+     * @notice  Creates a betting proposal and places a bet on it
+     * @param   description the proposal itself. a string describing the subject of the bet
+     * @param   bet a bet to be placed on the created proposal
+     * @param   betsClosedAt unix timestamp (in seconds) after which no more bets will be accepted
+     * @param   readyForValidationAt timestamp (in seconds) after which the proposal may be validated
+     * @return  proposalId the id of the proposal
+     */
     function propose(
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
@@ -53,6 +67,12 @@ contract DABookie {
         _placeBet(proposalId, msg.sender, bet, msg.value);
     }
 
+    /**
+     * @notice  Places a bet on an existing proposal
+     * @param   proposalId  the proposal to bet on
+     * @param   bet  the bet to be placed
+     * @return  betId  the id of the placed bet
+     */
     function placeBet(uint256 proposalId, string calldata bet)
         external
         payable
@@ -61,6 +81,9 @@ contract DABookie {
         return _placeBet(proposalId, msg.sender, bet, msg.value);
     }
 
+    /**
+     * @notice  Claims rewards from validated proposals where caller's bets were placed
+     */
     function claimRewards() external {
         uint256 totalRewards = 0;
         uint256 numberOfBetsToClaim = betsToClaim[msg.sender].length();
@@ -88,6 +111,10 @@ contract DABookie {
         }
     }
 
+    /**
+     * @notice  Gets all caller's bets that have not yet been claimed
+     * @return  betIds  an array of bet ids
+     */
     function getActiveBets() external view returns (uint256[] memory betIds) {
         uint256 numberOfActiveBets = betsToClaim[msg.sender].length();
 
