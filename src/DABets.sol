@@ -7,10 +7,11 @@ import "./Errors.sol";
 /**
  * @author  0xerife
  * @title   Decentralized Autonomous Bets
- * @dev     .
- * @notice  This smart contract manages proposals and their associated bets
+ * @dev     It should be noted that betId is the result of the hash over the bet and proposal id and does not include player data.
+            This means that multiple players may have staked ether on the same bet of a proposal.
+ * @notice  This smart contract manages proposals and their associated bets. Is also able to calculate the rewards of a bet.
+ *          Write operations may only be called by the DABookie.
  */
-
 contract DABets {
     struct Proposal {
         uint256 id;
@@ -36,6 +37,11 @@ contract DABets {
         bookie = _bookie;
     }
 
+    /**
+     * @notice  Adds a betting proposal. May only be called by the bookie
+     * @param   proposal the proposal
+     * @return  proposalId  the proposal id
+     */
     function addProposal(Proposal memory proposal)
         external
         onlyBookie
@@ -51,6 +57,14 @@ contract DABets {
         return proposalId;
     }
 
+    /**
+     * @notice  Adds a bet and its stake to a proposal
+     * @param   proposalId  the proposal id
+     * @param   player  who's betting
+     * @param   bet  the bet
+     * @param   stake  staked ether
+     * @return  betId  the bet id
+     */
     function placeBet(
         uint256 proposalId,
         address player,
@@ -81,6 +95,11 @@ contract DABets {
         return betId;
     }
 
+    /**
+     * @notice  Gets a proposal by its id
+     * @param   proposalId  the proposal id
+     * @return  proposal  the proposal
+     */
     function getProposal(uint256 proposalId)
         external
         view
@@ -90,6 +109,11 @@ contract DABets {
         return proposals[proposalId];
     }
 
+    /**
+     * @notice  Gets a bet's staked ether amount
+     * @param   betId  the bet id
+     * @return  stake  the amount of staked ether
+     */
     function getStakeOnBet(uint256 betId)
         external
         view
@@ -98,6 +122,12 @@ contract DABets {
         return betStakes[betId];
     }
 
+    /**
+     * @notice  Gets a player's stake on a bet
+     * @param   player  the player address
+     * @param   betId  the bet id
+     * @return  stake  the amount of staked ether
+     */
     function getPlayerStakeOnBet(address player, uint256 betId)
         external
         view
@@ -106,6 +136,12 @@ contract DABets {
         return playerStakes[player][betId];
     }
 
+    /**
+     * @notice  Calculates a player's rewards on a placed bet
+     * @param   player  the player address
+     * @param   betId  the bet id
+     * @return  uint256  the reward
+     */
     function calculateRewards(address player, uint256 betId)
         public
         view
