@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "openzeppelin/utils/structs/EnumerableMap.sol";
 import "./DABets.sol";
 import "./Errors.sol";
 
@@ -13,12 +12,10 @@ import "forge-std/console2.sol";
  * @notice  Creates betting proposals and places bets in the exchange for staking eth
  */
 contract DABookie {
-    using EnumerableMap for EnumerableMap.UintToUintMap;
-
     DABets public bets;
     uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
-    // address => betId => proposalId
-    mapping(address => EnumerableMap.UintToUintMap) betsToClaim;
+    // address => betId[]
+    mapping(address => uint256[]) betsToClaim;
 
     constructor() {
         bets = new DABets(this);
@@ -86,24 +83,17 @@ contract DABookie {
      */
     function claimRewards() external {
         uint256 totalRewards = 0;
-        uint256 numberOfBetsToClaim = betsToClaim[msg.sender].length();
-        uint256[] memory betIds = new uint256[](numberOfBetsToClaim);
+        uint256[] memory claimables = betsToClaim[msg.sender];
 
-        for (uint256 i = 0; i < numberOfBetsToClaim; i++) {
-            (uint256 betId, uint256 proposalId) = betsToClaim[msg.sender].at(i);
-
-            totalRewards += bets.getProposal(proposalId).validated
+        for (uint256 i = 0; i < claimables.length; i++) {
+            uint256 betId = claimables[i];
+            bool isWinner = bets.isWinner(betId);
+            totalRewards += isWinner
                 ? bets.calculateRewards(msg.sender, betId)
                 : 0;
-
-            betIds[i] = betId;
         }
 
-        // todo: hmmm..
-        for (uint256 i = 0; i < numberOfBetsToClaim; i++) {
-            betsToClaim[msg.sender].remove(betIds[i]);
-        }
-
+        delete betsToClaim[msg.sender]; // todo: is this ok?
         (bool success, ) = msg.sender.call{value: totalRewards}("");
 
         if (!success) {
@@ -116,12 +106,11 @@ contract DABookie {
      * @return  betIds  an array of bet ids
      */
     function getActiveBets() external view returns (uint256[] memory betIds) {
-        uint256 numberOfActiveBets = betsToClaim[msg.sender].length();
+        uint256[] memory claimables = betsToClaim[msg.sender];
+        betIds = new uint256[](claimables.length);
 
-        betIds = new uint256[](numberOfActiveBets);
-
-        for (uint256 i = 0; i < numberOfActiveBets; i++) {
-            (uint256 betId, ) = betsToClaim[msg.sender].at(0);
+        for (uint256 i = 0; i < claimables.length; i++) {
+            uint256 betId = betsToClaim[msg.sender][i];
             betIds[i] = betId;
         }
 
@@ -162,7 +151,7 @@ contract DABookie {
         returns (uint256 betId)
     {
         betId = bets.placeBet(proposalId, player, bet, stake);
-        betsToClaim[player].set(betId, proposalId);
+        betsToClaim[player].push(betId);
     }
 
     modifier ensureEnoughStake(uint256 stake) {
