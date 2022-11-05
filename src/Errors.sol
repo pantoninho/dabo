@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 error Unauthorized();
 error ProposalNotFound();
+error BetNotFound();
 error DuplicateBet();
 error ClosedBets();
 error InsufficientStake();
