@@ -55,8 +55,6 @@ contract DABets {
 
         proposal.id = proposalId;
         proposals[proposalId] = proposal;
-
-        return proposalId;
     }
 
     /**
@@ -96,8 +94,6 @@ contract DABets {
 
         // increment proposal bet pool
         proposals[proposalId].betPool += stake;
-
-        return betId;
     }
 
     /**
