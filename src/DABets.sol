@@ -55,8 +55,6 @@ contract DABets {
 
         proposal.id = proposalId;
         proposals[proposalId] = proposal;
-
-        return proposalId;
     }
 
     /**
@@ -75,6 +73,7 @@ contract DABets {
     )
         external
         onlyBookie
+        ensureStake(stake)
         ensureProposalExists(proposalId)
         returns (uint256 betId)
     {
@@ -95,8 +94,6 @@ contract DABets {
 
         // increment proposal bet pool
         proposals[proposalId].betPool += stake;
-
-        return betId;
     }
 
     /**
@@ -111,6 +108,20 @@ contract DABets {
         returns (Proposal memory proposal)
     {
         return proposals[proposalId];
+    }
+
+    /**
+     * @notice  Gets a proposal associated with a betid
+     * @param   betId  the betId id
+     * @return  proposal  the proposal
+     */
+    function getProposalByBetId(uint256 betId)
+        external
+        view
+        ensureBetExists(betId)
+        returns (Proposal memory proposal)
+    {
+        return proposals[betToProposal[betId]];
     }
 
     /**
@@ -187,15 +198,22 @@ contract DABets {
     }
 
     modifier ensureProposalExists(uint256 id) {
-        if (proposals[id].creator == address(0)) {
+        if (proposals[id].id == 0) {
             revert ProposalNotFound();
         }
         _;
     }
 
     modifier ensureBetExists(uint256 id) {
-        if (betStakes[id] == 0) {
+        if (betToProposal[id] == 0) {
             revert BetNotFound();
+        }
+        _;
+    }
+
+    modifier ensureStake(uint256 stake) {
+        if (stake == 0) {
+            revert InsufficientStake();
         }
         _;
     }
