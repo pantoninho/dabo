@@ -26,6 +26,8 @@ contract DABets {
 
     DABookie bookie;
     mapping(uint256 => Proposal) proposals;
+    // betId => proposalId
+    mapping(uint256 => uint256) betToProposal;
     // betId => staked amount
     mapping(uint256 => uint256) betStakes;
     // address => betId => stake
@@ -79,8 +81,10 @@ contract DABets {
         betId = _placedBetId(proposalId, bet);
 
         // bet does not exist yet, add it to proposal bets array
+        // and link their ids in betToProposal
         if (betStakes[betId] == 0) {
             proposals[proposalId].bets.push(bet);
+            betToProposal[betId] = proposalId;
         }
 
         // increment player staked amount on this bet
@@ -137,30 +141,34 @@ contract DABets {
     }
 
     /**
-     * @notice  Calculates a player's rewards on a placed bet
+     * @notice  Calculates a player's current potential rewards on a placed bet
+     * @dev     This may be called while the bet is still ongoing. It calculates the rewards if the player's bet was a winner.
      * @param   player  the player address
      * @param   betId  the bet id
-     * @return  uint256  the reward
+     * @return  rewards  the reward
      */
     function calculateRewards(address player, uint256 betId)
         public
         view
-        returns (uint256)
+        ensureBetExists(betId)
+        returns (uint256 rewards)
     {
-        uint256 proposalId = validBets[betId];
-
-        if (proposalId == 0) {
-            return 0;
-        }
-
+        uint256 proposalId = betToProposal[betId];
         DABets.Proposal memory proposal = proposals[proposalId];
 
         uint256 totalStake = proposal.betPool;
         uint256 betStake = betStakes[betId];
         uint256 playerStake = playerStakes[player][betId];
-        uint256 winningShare = (totalStake * playerStake) / betStake;
+        rewards = (totalStake * playerStake) / betStake;
+    }
 
-        return winningShare;
+    /**
+     * @notice  Checks if this bet won it's proposal
+     * @param   betId  the bet id
+     * @return  winner  boolean indicating if this bet gets rewards
+     */
+    function isWinner(uint256 betId) public view returns (bool winner) {
+        return validBets[betId] != 0;
     }
 
     function _placedBetId(uint256 proposalId, string memory bet)
@@ -181,6 +189,13 @@ contract DABets {
     modifier ensureProposalExists(uint256 id) {
         if (proposals[id].creator == address(0)) {
             revert ProposalNotFound();
+        }
+        _;
+    }
+
+    modifier ensureBetExists(uint256 id) {
+        if (betStakes[id] == 0) {
+            revert BetNotFound();
         }
         _;
     }

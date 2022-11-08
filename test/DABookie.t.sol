@@ -166,7 +166,7 @@ contract DABookieTest is Test {
         _mockProposal(proposalId, betsClosedAt, true);
 
         vm.warp(when);
-        uint256 betId = _placeBet(proposalId, player, bet, stake);
+        uint256 betId = _placeBet(proposalId, player, bet, stake, true);
 
         uint256 reward = uint256(stake) * 2;
         vm.deal(address(bookie), reward);
@@ -199,7 +199,7 @@ contract DABookieTest is Test {
         _mockProposal(proposalId, betsClosedAt, true);
 
         vm.warp(when);
-        uint256 betId = _placeBet(proposalId, player, bet, stake);
+        uint256 betId = _placeBet(proposalId, player, bet, stake, true);
 
         uint256 reward = uint256(stake) * 2;
         vm.deal(address(bookie), reward);
@@ -234,7 +234,7 @@ contract DABookieTest is Test {
         _mockProposal(proposalId, betsClosedAt, false);
         vm.warp(when);
 
-        uint256 betId = _placeBet(proposalId, player, bet, stake);
+        uint256 betId = _placeBet(proposalId, player, bet, stake, false);
         uint256 reward = uint256(stake) * 2;
 
         vm.mockCall(
@@ -264,7 +264,7 @@ contract DABookieTest is Test {
         _mockProposal(proposalId, betsClosedAt, true);
 
         vm.warp(when);
-        uint256 betId = _placeBet(proposalId, player, bet, stake);
+        uint256 betId = _placeBet(proposalId, player, bet, stake, true);
         uint256 reward = uint256(stake) * 2;
 
         vm.mockCall(
@@ -317,20 +317,6 @@ contract DABookieTest is Test {
         );
     }
 
-    function _mockBet(uint256 betId, uint256 stake) internal {
-        vm.mockCall(
-            address(bets),
-            abi.encodeWithSelector(DABets.placeBet.selector),
-            abi.encode(betId)
-        );
-
-        vm.mockCall(
-            address(bets),
-            abi.encodeWithSelector(DABets.getStakeOnBet.selector, betId),
-            abi.encode(stake)
-        );
-    }
-
     function _placeBet(
         uint256 proposalId,
         address player,
@@ -339,5 +325,20 @@ contract DABookieTest is Test {
     ) internal returns (uint256 betId) {
         hoax(player, stake);
         return bookie.placeBet{value: stake}(proposalId, bet);
+    }
+
+    function _placeBet(
+        uint256 proposalId,
+        address player,
+        string memory bet,
+        uint256 stake,
+        bool isWinner
+    ) internal returns (uint256 betId) {
+        betId = _placeBet(proposalId, player, bet, stake);
+        vm.mockCall(
+            address(bets),
+            abi.encodeWithSelector(DABets.isWinner.selector, betId),
+            abi.encode(isWinner)
+        );
     }
 }
