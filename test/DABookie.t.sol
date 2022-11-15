@@ -16,7 +16,7 @@ contract DAIBookieTest is Test {
         vm.assume(a != address(vm));
         vm.assume(a != address(daim));
         vm.assume(a != address(daim.factx()));
-        vm.assume(a != address(daim.dab()));
+        vm.assume(a != address(daim.fact()));
         vm.assume(a != address(daim.bookie()));
         vm.assume(a != address(daim.bets()));
         vm.assume(a != address(daim.treasury()));
@@ -24,7 +24,7 @@ contract DAIBookieTest is Test {
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
 
-        emit log_address(address(daim.dab()));
+        emit log_address(address(daim.fact()));
     }
 
     modifier assumeSufficientStake(uint256 stake) {

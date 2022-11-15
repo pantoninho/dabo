@@ -17,7 +17,7 @@ import "./Errors.sol";
  */
 contract DAIM {
     DAIMTreasury public treasury;
-    FACT public dab;
+    FACT public fact;
     FACTx public factx;
     DAIBookie public bookie;
     DAIOffice public office;
@@ -25,8 +25,8 @@ contract DAIM {
 
     constructor() {
         treasury = new DAIMTreasury();
-        dab = new FACT(1000, treasury);
-        factx = new FACTx(dab);
+        fact = new FACT(1000, treasury);
+        factx = new FACTx(fact);
 
         bets = new DAIMarkets(this);
         bookie = new DAIBookie(this);

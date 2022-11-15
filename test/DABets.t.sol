@@ -14,7 +14,7 @@ contract DAIBookieTest is Test {
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
         vm.assume(a != address(daim.factx()));
-        vm.assume(a != address(daim.dab()));
+        vm.assume(a != address(daim.fact()));
         vm.assume(a != address(daim.bookie()));
         vm.assume(a != address(daim.bets()));
         vm.assume(a != address(daim.treasury()));
