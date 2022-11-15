@@ -36,7 +36,6 @@ contract DABOffice {
     // a validation process represents a set of validation rounds
     // there needs to be multiple consecutive consensus for the process to complete successfully
     struct ValidationProcess {
-        bool started;
         bool validated;
         uint256 currentRound;
         uint256 consecutiveConsensus;
@@ -126,18 +125,14 @@ contract DABOffice {
     function validate(uint256[] memory betIds) external onlyValidators {
         DABets.Proposal memory proposal = bets().getProposalByBetId(betIds[0]);
 
+        if (!_isValidatorOf(msg.sender, proposal.id)) {
+            revert Unauthorized();
+        }
+
         for (uint256 i = 1; i < betIds.length; i++) {
             if (proposal.id != bets().getProposalByBetId(betIds[i]).id) {
                 revert InvalidBetId();
             }
-        }
-
-        if (proposal.readyForValidationAt >= block.timestamp) {
-            revert ProposalNotReadyForValidation();
-        }
-
-        if (!_isValidatorOf(msg.sender, proposal.id)) {
-            revert Unauthorized();
         }
 
         _validate(msg.sender, proposal.id, betIds, false);
@@ -447,10 +442,6 @@ contract DABOffice {
 
     function bets() internal view returns (DABets) {
         return dabo.bets();
-    }
-
-    function office() internal view returns (DABOffice) {
-        return dabo.office();
     }
 
     function dabv() internal view returns (DABV) {

@@ -127,6 +127,34 @@ contract DABOfficeTest is Test {
         office.validate(betIds);
     }
 
+    function testValidateInvalidBetId() public {
+        address[] memory validators = _mockValidators(100);
+
+        uint256 currentTimestamp = 1000;
+        vm.warp(currentTimestamp);
+
+        uint256[] memory p1BetIds = new uint256[](1);
+        p1BetIds[0] = 1;
+        uint256[] memory p2BetIds = new uint256[](1);
+        p2BetIds[0] = 2;
+        _mockProposalToBeValidated(1, p1BetIds, currentTimestamp - 100);
+        _mockProposalToBeValidated(2, p2BetIds, currentTimestamp - 100);
+
+        office.startValidationRound(1);
+
+        address[] memory p1Validators = _getValidatorsForProposalId(
+            validators,
+            1
+        );
+
+        vm.prank(p1Validators[0]);
+        uint256[] memory validatorBetIds = new uint256[](2);
+        validatorBetIds[0] = 1;
+        validatorBetIds[1] = 2;
+        vm.expectRevert(InvalidBetId.selector);
+        office.validate(validatorBetIds);
+    }
+
     function testValidateNotPickedValidator() public {
         address[] memory validators = _mockValidators(100);
         uint256 currentTimestamp = 1000;
