@@ -1,6 +1,6 @@
 {
   "name": "dabo",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "DABO validates bets in return for a fee.",
   "repository": {
     "type": "git",
