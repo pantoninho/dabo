@@ -36,8 +36,6 @@ contract DABets {
     mapping(uint256 => string) betIdToString;
     // address => betId => stake
     mapping(address => mapping(uint256 => uint256)) playerStakes;
-    // betId => proposalId
-    mapping(uint256 => uint256) validBets;
 
     constructor(DABookie _bookie) {
         bookie = _bookie;
@@ -177,15 +175,6 @@ contract DABets {
         uint256 betStake = betStakes[betId];
         uint256 playerStake = playerStakes[player][betId];
         rewards = (totalStake * playerStake) / betStake;
-    }
-
-    /**
-     * @notice  Checks if this bet won it's proposal
-     * @param   betId  the bet id
-     * @return  winner  boolean indicating if this bet gets rewards
-     */
-    function isWinner(uint256 betId) external view returns (bool winner) {
-        return validBets[betId] != 0;
     }
 
     function getActiveProposals()

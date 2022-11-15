@@ -91,7 +91,7 @@ contract DABookie {
 
         for (uint256 i = 0; i < claimables.length; i++) {
             uint256 betId = claimables[i];
-            bool isWinner = bets.isWinner(betId);
+            bool isWinner = office.isWinner(betId);
             totalRewards += isWinner
                 ? bets.calculateRewards(msg.sender, betId)
                 : 0;
