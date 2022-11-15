@@ -2,42 +2,42 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABO.sol";
+import "../src/DAIM.sol";
 
-contract DABookieTest is Test {
-    DABO public dabo;
-    DABets public bets;
-    DABookie public bookie;
+contract DAIBookieTest is Test {
+    DAIM public daim;
+    DAIMarkets public bets;
+    DAIBookie public bookie;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(dabo.dabv()));
-        vm.assume(a != address(dabo.dab()));
-        vm.assume(a != address(dabo.bookie()));
-        vm.assume(a != address(dabo.bets()));
-        vm.assume(a != address(dabo.treasury()));
-        vm.assume(a != address(dabo.office()));
+        vm.assume(a != address(daim.factx()));
+        vm.assume(a != address(daim.fact()));
+        vm.assume(a != address(daim.bookie()));
+        vm.assume(a != address(daim.bets()));
+        vm.assume(a != address(daim.treasury()));
+        vm.assume(a != address(daim.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
 
     function setUp() public {
-        dabo = new DABO();
-        bets = dabo.bets();
-        bookie = dabo.bookie();
+        daim = new DAIM();
+        bets = daim.bets();
+        bookie = daim.bookie();
     }
 
     function testAddProposalNotBoookie() public {
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
 
         vm.expectRevert(Unauthorized.selector);
         bets.addProposal(proposal);
     }
 
     function testAddProposalFromBookie() public {
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
 
         vm.prank(address(bookie));
         uint256 id = bets.addProposal(proposal);
@@ -87,7 +87,7 @@ contract DABookieTest is Test {
         vm.assume(player1 != player2);
         vm.startPrank(address(bookie));
 
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         uint256 proposalId = bets.addProposal(proposal);
 
         uint256 bet1Id = bets.placeBet(proposalId, player1, bet, stake);
@@ -115,7 +115,7 @@ contract DABookieTest is Test {
         vm.assume(player1 != player2);
         vm.startPrank(address(bookie));
 
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         uint256 proposalId = bets.addProposal(proposal);
 
         uint256 bet1Id = bets.placeBet(proposalId, player1, "bet 1", p1stake);
@@ -141,7 +141,7 @@ contract DABookieTest is Test {
         vm.assume(player1 != player2);
         vm.startPrank(address(bookie));
 
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         uint256 proposalId = bets.addProposal(proposal);
 
         uint256 bet1Id = bets.placeBet(proposalId, player1, bet, p1stake);

@@ -5,12 +5,12 @@ import "openzeppelin/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 import "openzeppelin/token/ERC20/extensions/ERC4626.sol";
 
-contract DABV is ERC4626, ERC20Permit, ERC20Votes {
+contract FACTx is ERC4626, ERC20Permit, ERC20Votes {
     address[] owners;
 
     constructor(IERC20 asset)
-        ERC20("DAB Validator", "DABV")
-        ERC20Permit("DAB Validator")
+        ERC20("DAIM FACT Checker", "FACTx")
+        ERC20Permit("DAIM FACT Checker")
         ERC4626(asset)
     {}
 

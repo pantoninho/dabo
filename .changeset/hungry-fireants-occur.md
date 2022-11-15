@@ -2,6 +2,6 @@
 "dabo": minor
 ---
 
-add daboffice
+add daioffice
 add dabo
 update tests

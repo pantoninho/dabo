@@ -90,19 +90,19 @@ TODO: description
 TODO: state
 TODO: API
 
-#### **DABOTreasury**
+#### **DAIMTreasury**
 TODO: description
 TODO: state
 TODO: API
 
-#### **DABookie**
+#### **DAIBookie**
 This is the smart contract that players mostly interact with. It is responsible for:
 * creating and placing bets
 * holding player stakes
 * transfering winning shares to rewards claimers
 
 ##### **State**
-* `DABets bets`: bet catalogue
+* `DAIMarkets bets`: bet catalogue
 * `mapping(uint => string[])`: bets per proposal
 * `mapping(uint => uint) betPools`: total staked ether per proposal
 * `mapping(address => mapping(uint => uint)) playerStakes`: stakes per placed bet per address
@@ -114,13 +114,13 @@ This is the smart contract that players mostly interact with. It is responsible 
 * `payable place(string bet, uint proposalId)`
 * `claimRewards(uint proposalId)`
 
-#### **DABets**
-This smart contracts acts as the bet catalogue. It allows `DABookie` to create new bets but is read-only to any other caller. It is responsible for:
-* adding bets from `DABookie` to the catalogue
+#### **DAIMarkets**
+This smart contracts acts as the bet catalogue. It allows `DAIBookie` to create new bets but is read-only to any other caller. It is responsible for:
+* adding bets from `DAIBookie` to the catalogue
 * getting bet details
 
 ##### **State**
-* `DABookie bookie`
+* `DAIBookie bookie`
 * `mapping(uint => Proposal) proposals`
 
 ##### **API**
