@@ -2,16 +2,16 @@
 pragma solidity ^0.8.17;
 
 import "openzeppelin/token/ERC20/ERC20.sol";
-import "./DABOTreasury.sol";
+import "./DAIMTreasury.sol";
 
 /**
  * @author  0xerife
- * @title   DABO Token (DAB)
+ * @title   DAIM Token (FACT)
  * @notice  TODO: write this
  */
-contract DAB is ERC20 {
+contract FACT is ERC20 {
     uint256 maxSupply;
-    DABOTreasury treasury;
+    DAIMTreasury treasury;
 
     error MaxSupplyReached();
     error Unauthorized();
@@ -37,8 +37,8 @@ contract DAB is ERC20 {
         _;
     }
 
-    constructor(uint256 _maxSupply, DABOTreasury _treasury)
-        ERC20("DABO Tokens", "DAB")
+    constructor(uint256 _maxSupply, DAIMTreasury _treasury)
+        ERC20("DAIM Tokens", "FACT")
     {
         maxSupply = _maxSupply;
         treasury = _treasury;
@@ -49,7 +49,7 @@ contract DAB is ERC20 {
     }
 
     /**
-     * @notice  mints DAB tokens to a target account. reverts if maxTotalSupply has been reached
+     * @notice  mints FACT tokens to a target account. reverts if maxTotalSupply has been reached
      * @param   account  target account
      * @param   amount  amount of tokens to mint
      */

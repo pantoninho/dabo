@@ -5,17 +5,17 @@ import "forge-std/console2.sol";
 import "openzeppelin/utils/structs/EnumerableSet.sol";
 import "openzeppelin/utils/structs/EnumerableMap.sol";
 
-import "./DABO.sol";
-import "./DABets.sol";
-import "./DABV.sol";
+import "./DAIM.sol";
+import "./DAIMarkets.sol";
+import "./FACTx.sol";
 import "./Errors.sol";
 
 /**
  * @author  0xerife
- * @title   DABO Office
+ * @title   DAIM Office
  * @notice  TODO: write this
  */
-contract DABOffice {
+contract DAIOffice {
     using EnumerableSet for EnumerableSet.UintSet;
 
     // a validation represents a bet(s) chosen as correct by validators for a specific proposal.
@@ -53,7 +53,7 @@ contract DABOffice {
     uint256 public constant minimumConsecutiveConsensus = 3;
     uint256 public constant maximumValidationRounds = 50;
 
-    DABO dabo;
+    DAIM daim;
 
     uint256[] activeValidationProcesses;
     // proposal id => Validation Process
@@ -71,8 +71,8 @@ contract DABOffice {
     // validation id => ProposalValidation
     mapping(uint256 => ProposalValidation) validations;
 
-    constructor(DABO _dabo) {
-        dabo = _dabo;
+    constructor(DAIM _daim) {
+        daim = _daim;
     }
 
     function startValidationRound(uint256 proposalId)
@@ -123,7 +123,7 @@ contract DABOffice {
     }
 
     function validate(uint256[] memory betIds) external onlyValidators {
-        DABets.Proposal memory proposal = bets().getProposalByBetId(betIds[0]);
+        DAIMarkets.Proposal memory proposal = bets().getProposalByBetId(betIds[0]);
 
         if (!_isValidatorOf(msg.sender, proposal.id)) {
             revert Unauthorized();
@@ -157,7 +157,7 @@ contract DABOffice {
     }
 
     function isWinner(uint256 betId) external view returns (bool) {
-        DABets.Proposal memory proposal = bets().getProposalByBetId(betId);
+        DAIMarkets.Proposal memory proposal = bets().getProposalByBetId(betId);
 
         if (!validationProcesses[proposal.id].validated) {
             return false;
@@ -243,7 +243,7 @@ contract DABOffice {
     function _assignValidators(uint256 proposalId) internal {
         uint256 currentRoundId = _getCurrentRoundId(proposalId);
 
-        address[] memory validators = dabv().getOwners();
+        address[] memory validators = factx().getOwners();
 
         if (validators.length == 0) {
             return;
@@ -263,7 +263,7 @@ contract DABOffice {
             currentRound.validators.push(pickedValidator);
             pendingValidationsByValidator[pickedValidator]++;
 
-            uint256 validatorWeight = dabv().balanceOf(pickedValidator);
+            uint256 validatorWeight = factx().balanceOf(pickedValidator);
             currentRound.totalWeight += validatorWeight;
             validatorsByRound[currentRoundId][
                 pickedValidator
@@ -440,16 +440,16 @@ contract DABOffice {
             keccak256(abi.encodePacked(v2BetIds));
     }
 
-    function bets() internal view returns (DABets) {
-        return dabo.bets();
+    function bets() internal view returns (DAIMarkets) {
+        return daim.bets();
     }
 
-    function dabv() internal view returns (DABV) {
-        return dabo.dabv();
+    function factx() internal view returns (FACTx) {
+        return daim.factx();
     }
 
     modifier onlyValidators() {
-        if (dabv().balanceOf(msg.sender) == 0) {
+        if (factx().balanceOf(msg.sender) == 0) {
             revert Unauthorized();
         }
         _;
@@ -466,7 +466,7 @@ contract DABOffice {
     }
 
     modifier ensureEnoughValidators() {
-        if (dabv().getOwners().length < minValidators) {
+        if (factx().getOwners().length < minValidators) {
             revert NotEnoughValidators();
         }
         _;

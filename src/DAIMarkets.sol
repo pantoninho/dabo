@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./DABookie.sol";
-import "./DABO.sol";
+import "./DAIBookie.sol";
+import "./DAIM.sol";
 import "./Errors.sol";
 
 /**
@@ -11,9 +11,9 @@ import "./Errors.sol";
  * @dev     It should be noted that betId is the result of the hash over the bet and proposal id and does not include player data.
             This means that multiple players may have staked ether on the same bet of a proposal.
  * @notice  This smart contract manages proposals and their associated bets. Is also able to calculate the rewards of a bet.
- *          Write operations may only be called by the DABookie.
+ *          Write operations may only be called by the DAIBookie.
  */
-contract DABets {
+contract DAIMarkets {
     struct Proposal {
         uint256 id;
         string description;
@@ -25,7 +25,7 @@ contract DABets {
         bool validated;
     }
 
-    DABO dabo;
+    DAIM daim;
 
     // [proposalId]
     uint256[] proposalIds;
@@ -39,8 +39,8 @@ contract DABets {
     // address => betId => stake
     mapping(address => mapping(uint256 => uint256)) playerStakes;
 
-    constructor(DABO _dabo) {
-        dabo = _dabo;
+    constructor(DAIM _daim) {
+        daim = _daim;
     }
 
     /**
@@ -171,7 +171,7 @@ contract DABets {
         returns (uint256 rewards)
     {
         uint256 proposalId = betToProposal[betId];
-        DABets.Proposal memory proposal = proposals[proposalId];
+        DAIMarkets.Proposal memory proposal = proposals[proposalId];
 
         uint256 totalStake = proposal.betPool;
         uint256 betStake = betStakes[betId];
@@ -235,14 +235,14 @@ contract DABets {
     }
 
     modifier onlyBookie() {
-        if (msg.sender != address(dabo.bookie())) {
+        if (msg.sender != address(daim.bookie())) {
             revert Unauthorized();
         }
         _;
     }
 
     modifier onlyOffice() {
-        if (msg.sender != address(dabo.office())) {
+        if (msg.sender != address(daim.office())) {
             revert Unauthorized();
         }
         _;

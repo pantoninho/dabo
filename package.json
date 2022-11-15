@@ -1,7 +1,7 @@
 {
-  "name": "dabo",
+  "name": "DAIM",
   "version": "0.0.0",
-  "description": "DABO validates bets in return for a fee.",
+  "description": "DAIM validates bets in return for a fee.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pantoninho/dabo.git"

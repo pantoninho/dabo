@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./DABO.sol";
-import "./DABets.sol";
-import "./DABOffice.sol";
+import "./DAIM.sol";
+import "./DAIMarkets.sol";
+import "./DAIOffice.sol";
 import "./Errors.sol";
 
 import "forge-std/console2.sol";
@@ -13,15 +13,15 @@ import "forge-std/console2.sol";
  * @title   Decentralized Autonomous Bookie
  * @notice  Creates betting proposals and places bets in the exchange for staking eth
  */
-contract DABookie {
-    DABO public dabo;
+contract DAIBookie {
+    DAIM public daim;
 
     uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
     // address => betId[]
     mapping(address => uint256[]) betsToClaim;
 
-    constructor(DABO _dabo) {
-        dabo = _dabo;
+    constructor(DAIM _daim) {
+        daim = _daim;
     }
 
     /**
@@ -120,12 +120,12 @@ contract DABookie {
         return betIds;
     }
 
-    function bets() internal view returns (DABets) {
-        return dabo.bets();
+    function bets() internal view returns (DAIMarkets) {
+        return daim.bets();
     }
 
-    function office() internal view returns (DABOffice) {
-        return dabo.office();
+    function office() internal view returns (DAIOffice) {
+        return daim.office();
     }
 
     function _propose(
@@ -138,7 +138,7 @@ contract DABookie {
             revert InvalidDates();
         }
 
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         proposal.description = description;
         proposal.creator = msg.sender;
         proposal.betsClosedAt = betsClosedAt;
