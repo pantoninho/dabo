@@ -10,10 +10,5 @@ import "./DAB.sol";
  * @notice  TODO: write this
  */
 contract DABOTreasury {
-    DAB public dab;
-
-    constructor(uint256 initialMaxSupply) {
-        // TODO: test if is an instance of DAB?
-        dab = new DAB(initialMaxSupply, this);
-    }
+    constructor() {}
 }

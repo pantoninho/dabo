@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./DABookie.sol";
+import "./DABO.sol";
 import "./Errors.sol";
 
 /**
@@ -24,19 +25,22 @@ contract DABets {
         bool validated;
     }
 
-    DABookie bookie;
+    DABO dabo;
+
+    // [proposalId]
+    uint256[] proposalIds;
     mapping(uint256 => Proposal) proposals;
     // betId => proposalId
     mapping(uint256 => uint256) betToProposal;
     // betId => staked amount
     mapping(uint256 => uint256) betStakes;
+    // betId => string
+    mapping(uint256 => string) betIdToString;
     // address => betId => stake
     mapping(address => mapping(uint256 => uint256)) playerStakes;
-    // betId => proposalId
-    mapping(uint256 => uint256) validBets;
 
-    constructor(DABookie _bookie) {
-        bookie = _bookie;
+    constructor(DABO _dabo) {
+        dabo = _dabo;
     }
 
     /**
@@ -55,6 +59,7 @@ contract DABets {
 
         proposal.id = proposalId;
         proposals[proposalId] = proposal;
+        proposalIds.push(proposalId);
     }
 
     /**
@@ -84,6 +89,7 @@ contract DABets {
         if (betStakes[betId] == 0) {
             proposals[proposalId].bets.push(bet);
             betToProposal[betId] = proposalId;
+            betIdToString[betId] = bet;
         }
 
         // increment player staked amount on this bet
@@ -159,7 +165,7 @@ contract DABets {
      * @return  rewards  the reward
      */
     function calculateRewards(address player, uint256 betId)
-        public
+        external
         view
         ensureBetExists(betId)
         returns (uint256 rewards)
@@ -173,13 +179,51 @@ contract DABets {
         rewards = (totalStake * playerStake) / betStake;
     }
 
-    /**
-     * @notice  Checks if this bet won it's proposal
-     * @param   betId  the bet id
-     * @return  winner  boolean indicating if this bet gets rewards
-     */
-    function isWinner(uint256 betId) public view returns (bool winner) {
-        return validBets[betId] != 0;
+    function getActiveProposals()
+        external
+        view
+        returns (Proposal[] memory activeProposals)
+    {
+        Proposal memory proposal;
+        uint256 counter;
+
+        for (uint256 i = 0; i < proposalIds.length; i++) {
+            proposal = proposals[proposalIds[i]];
+
+            // proposal already validated
+            if (proposal.validated) {
+                continue;
+            }
+
+            // bets already closed
+            if (proposal.betsClosedAt > block.timestamp) {
+                continue;
+            }
+
+            activeProposals[counter] = proposal;
+            counter++;
+        }
+    }
+
+    function getProposalsToBeValidated()
+        external
+        view
+        returns (Proposal[] memory proposalsToBeValidated)
+    {
+        Proposal memory proposal;
+        uint256 counter;
+
+        for (uint256 i = 0; i < proposalIds.length; i++) {
+            proposal = proposals[proposalIds[i]];
+
+            // proposal still not ready for validation
+            if (proposal.readyForValidationAt > block.timestamp) {
+                continue;
+            }
+
+            proposalsToBeValidated[counter] = proposal;
+            counter++;
+        }
     }
 
     function _placedBetId(uint256 proposalId, string memory bet)
@@ -191,7 +235,14 @@ contract DABets {
     }
 
     modifier onlyBookie() {
-        if (msg.sender != address(bookie)) {
+        if (msg.sender != address(dabo.bookie())) {
+            revert Unauthorized();
+        }
+        _;
+    }
+
+    modifier onlyOffice() {
+        if (msg.sender != address(dabo.office())) {
             revert Unauthorized();
         }
         _;

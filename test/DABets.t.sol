@@ -2,26 +2,31 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABookie.sol";
-import "../src/DABets.sol";
+import "../src/DABO.sol";
 
 contract DABookieTest is Test {
-    DABookie public bookie;
+    DABO public dabo;
     DABets public bets;
+    DABookie public bookie;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(bookie));
-        vm.assume(a != address(bets));
+        vm.assume(a != address(dabo.dabv()));
+        vm.assume(a != address(dabo.dab()));
+        vm.assume(a != address(dabo.bookie()));
+        vm.assume(a != address(dabo.bets()));
+        vm.assume(a != address(dabo.treasury()));
+        vm.assume(a != address(dabo.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
 
     function setUp() public {
-        bookie = new DABookie();
-        bets = bookie.bets();
+        dabo = new DABO();
+        bets = dabo.bets();
+        bookie = dabo.bookie();
     }
 
     function testAddProposalNotBoookie() public {
