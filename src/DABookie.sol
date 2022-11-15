@@ -2,6 +2,8 @@
 pragma solidity ^0.8.17;
 
 import "./DABets.sol";
+import "./DABOffice.sol";
+import "./DABV.sol";
 import "./Errors.sol";
 
 import "forge-std/console2.sol";
@@ -13,12 +15,14 @@ import "forge-std/console2.sol";
  */
 contract DABookie {
     DABets public bets;
+    DABOffice public office;
     uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
     // address => betId[]
     mapping(address => uint256[]) betsToClaim;
 
-    constructor() {
+    constructor(DABV _dabv) {
         bets = new DABets(this);
+        office = new DABOffice(this, bets, _dabv);
     }
 
     /**

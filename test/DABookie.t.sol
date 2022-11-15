@@ -4,10 +4,19 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../src/DABookie.sol";
 import "../src/DABets.sol";
+import "../src/DABV.sol";
+import "../src/DAB.sol";
+
+contract DABVMock is DABV {
+    constructor(IERC20 asset) DABV(asset) {}
+}
 
 contract DABookieTest is Test {
     DABookie public bookie;
     DABets public bets;
+    DABV public dabvMock;
+    DABOTreasury public daboTreasury;
+    DAB public dab;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
@@ -15,6 +24,10 @@ contract DABookieTest is Test {
         vm.assume(a != address(vm));
         vm.assume(a != address(bookie));
         vm.assume(a != address(bets));
+        vm.assume(a != address(dab));
+        vm.assume(a != address(dabvMock));
+        vm.assume(a != address(daboTreasury));
+        vm.assume(a != address(bookie.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
@@ -25,7 +38,10 @@ contract DABookieTest is Test {
     }
 
     function setUp() public {
-        bookie = new DABookie();
+        daboTreasury = new DABOTreasury(1000);
+        dab = new DAB(1000, daboTreasury);
+        dabvMock = new DABV(dab);
+        bookie = new DABookie(dabvMock);
         bets = bookie.bets();
     }
 
