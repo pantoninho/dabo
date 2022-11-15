@@ -20,8 +20,8 @@ contract DABTest is Test {
     }
 
     function setUp() public {
-        treasury = new DABOTreasury(maxSupply);
-        dab = treasury.dab();
+        treasury = new DABOTreasury();
+        dab = new DAB(10, treasury);
     }
 
     function testMintByTreasury(address to, uint256 amount)
@@ -41,11 +41,11 @@ contract DABTest is Test {
         dab.mint(to, amount);
     }
 
-    function testMintByOther(address from, address to, uint256 amount)
-        public
-        assumeValidAddress(from)
-        assumeValidAddress(to)
-    {
+    function testMintByOther(
+        address from,
+        address to,
+        uint256 amount
+    ) public assumeValidAddress(from) assumeValidAddress(to) {
         vm.startPrank(address(from));
         vm.expectRevert(DAB.Unauthorized.selector);
 

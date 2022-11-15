@@ -1,8 +1,10 @@
-# DABO - Decentralized Autonomous Betting Organization
-# DAVO - Decentralized Autonomous Validation Organization?
-DABO validates bets in return for a fee.
+# DAIM - Decentralized Autonomous Information Markets
+DAIM is a DAO that validates information in exchange for a fee, providing a platform for open and uncensored information markets created by the users themselves.
 
-Users may open bets about anything and a decentraliatzed group of validators will validate who's the winner. Smart contracts guarantee that winners will get their share of the bet pool and collect fees back to the organization.
+Anyone may propose or validate information markets to earn a share of the fees.
+Anyone may place bets on active markets by staking ether. Winners take all.
+
+DAIM has its own FACT token for governance and validation. Tokenomics ensure FACT price increases everytime a market is sucessfully validated which also makes it a good asset for investors.
 
 ## **Domain**
 
@@ -124,3 +126,9 @@ This smart contracts acts as the bet catalogue. It allows `DABookie` to create n
 ##### **API**
 * `create(Bet bet) => uint`
 * `get(uint id) => Bet`
+
+
+## doubts
+* new contracts vs structs
+* erc4646 
+* multiple inheritance
