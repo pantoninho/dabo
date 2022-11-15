@@ -8,10 +8,10 @@ DAIM has its own FACT token for governance and validation. Tokenomics ensure FAC
 
 ## **Domain**
 
-DABO is composed by:
-* **Players**: place bets by staking ether
-* **Validators**: validates bets by staking DAB tokens
-*Proposers: creates betting proposals? by staking tokens? (<-- investigate this idea. will influence tokenomics)*
+DAIM is composed by:
+* **Proposers**: creates markets
+* **Players?**: places bets in markets
+* **Validators**: validates markets 
 
 ### **Players**
 Players create **betting proposals** and place **bets** on existing proposals by staking ether. Winning **bets** makes players eligible to **claim rewards**. Losing **bets** lose their staked ether.
