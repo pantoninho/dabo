@@ -51,6 +51,7 @@ contract DABOffice {
     uint256 private constant minValidators = 20;
     uint256 public constant validatorsPercentagePerRound = 20;
     uint256 public constant minimumConsecutiveConsensus = 3;
+    uint256 public constant maximumValidationRounds = 50;
 
     DABookie bookie;
     DABets bets;
@@ -119,6 +120,12 @@ contract DABOffice {
             return;
         }
 
+        if (_roundLimitReached(proposalId)) {
+            process.validated = true;
+            veredictums[proposalId].noConsensus = true;
+            return;
+        }
+
         process.currentRound++;
         _assignValidators(proposalId);
     }
@@ -177,6 +184,14 @@ contract DABOffice {
         }
 
         return false;
+    }
+
+    function isUnconsensual(uint256 proposalId) external view returns (bool) {
+        if (!validationProcesses[proposalId].validated) {
+            return false;
+        }
+
+        return veredictums[proposalId].noConsensus;
     }
 
     function _isValidatorOf(address validator, uint256 proposalId)
@@ -280,13 +295,14 @@ contract DABOffice {
         return (totalValidators * validatorsPercentagePerRound) / 100 + 1;
     }
 
-    function _roundLimitReached(uint256 roundIndex)
+    function _roundLimitReached(uint256 proposalId)
         internal
-        pure
+        view
         returns (bool roundLimitReached)
     {
-        // todo: make this governance editable
-        return roundIndex >= 50;
+        return
+            validationProcesses[proposalId].currentRound >=
+            maximumValidationRounds;
     }
 
     function _consecutiveConsensusReached(uint256 proposalId)

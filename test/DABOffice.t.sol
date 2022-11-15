@@ -242,6 +242,36 @@ contract DABOfficeTest is Test {
         office.startValidationRound(1);
     }
 
+    function testStartValidationRoundLimitReach() public {
+        uint256 numberOfValidators = 20;
+        uint256[] memory betIds = new uint256[](2);
+        betIds[0] = 1;
+        betIds[1] = 2;
+        address[] memory validators = _mockValidators(numberOfValidators);
+
+        uint256 currentTimestamp = 1000;
+        vm.warp(currentTimestamp);
+
+        _mockProposalToBeValidated(1, betIds, block.timestamp - 100);
+
+        for (uint256 i = 0; i < office.maximumValidationRounds() + 1; i++) {
+            office.startValidationRound(1);
+            address[] memory proposalValidators = _getValidatorsForProposalId(
+                validators,
+                1
+            );
+
+            for (uint256 j = 0; j < proposalValidators.length; j++) {
+                vm.prank(proposalValidators[j]);
+                uint256[] memory validBetIds = new uint256[](1);
+                validBetIds[0] = (j % 2) + 1;
+                office.validate(validBetIds);
+            }
+        }
+
+        assertEq(office.isUnconsensual(1), true);
+    }
+
     function _getValidatorsForProposalId(
         address[] memory validators,
         uint256 proposalId
