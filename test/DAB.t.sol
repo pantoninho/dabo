@@ -2,12 +2,12 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DAB.sol";
-import "../src/DABOTreasury.sol";
+import "../src/FACT.sol";
+import "../src/DAIMTreasury.sol";
 
-contract DABTest is Test {
-    DABOTreasury public treasury;
-    DAB public dab;
+contract FACTTest is Test {
+    DAIMTreasury public treasury;
+    FACT public dab;
     uint256 maxSupply = 10;
 
     modifier assumeValidAddress(address a) {
@@ -20,8 +20,8 @@ contract DABTest is Test {
     }
 
     function setUp() public {
-        treasury = new DABOTreasury();
-        dab = new DAB(10, treasury);
+        treasury = new DAIMTreasury();
+        dab = new FACT(10, treasury);
     }
 
     function testMintByTreasury(address to, uint256 amount)
@@ -37,7 +37,7 @@ contract DABTest is Test {
         }
 
         // maxSupply should be reached here
-        vm.expectRevert(DAB.MaxSupplyReached.selector);
+        vm.expectRevert(FACT.MaxSupplyReached.selector);
         dab.mint(to, amount);
     }
 
@@ -47,7 +47,7 @@ contract DABTest is Test {
         uint256 amount
     ) public assumeValidAddress(from) assumeValidAddress(to) {
         vm.startPrank(address(from));
-        vm.expectRevert(DAB.Unauthorized.selector);
+        vm.expectRevert(FACT.Unauthorized.selector);
 
         dab.mint(to, amount);
     }

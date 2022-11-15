@@ -2,29 +2,29 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABO.sol";
+import "../src/DAIM.sol";
 
-contract DABookieTest is Test {
-    DABO public dabo;
-    DABookie public bookie;
-    DABets public bets;
-    DABOffice public office;
+contract DAIBookieTest is Test {
+    DAIM public daim;
+    DAIBookie public bookie;
+    DAIMarkets public bets;
+    DAIOffice public office;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(dabo));
-        vm.assume(a != address(dabo.dabv()));
-        vm.assume(a != address(dabo.dab()));
-        vm.assume(a != address(dabo.bookie()));
-        vm.assume(a != address(dabo.bets()));
-        vm.assume(a != address(dabo.treasury()));
-        vm.assume(a != address(dabo.office()));
+        vm.assume(a != address(daim));
+        vm.assume(a != address(daim.factx()));
+        vm.assume(a != address(daim.dab()));
+        vm.assume(a != address(daim.bookie()));
+        vm.assume(a != address(daim.bets()));
+        vm.assume(a != address(daim.treasury()));
+        vm.assume(a != address(daim.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
 
-        emit log_address(address(dabo.dab()));
+        emit log_address(address(daim.dab()));
     }
 
     modifier assumeSufficientStake(uint256 stake) {
@@ -33,10 +33,10 @@ contract DABookieTest is Test {
     }
 
     function setUp() public {
-        dabo = new DABO();
-        bookie = dabo.bookie();
-        bets = dabo.bets();
-        office = dabo.office();
+        daim = new DAIM();
+        bookie = daim.bookie();
+        bets = daim.bets();
+        office = daim.office();
     }
 
     function testCreateProposalWithoutBet(
@@ -184,7 +184,7 @@ contract DABookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DABets.calculateRewards.selector,
+                DAIMarkets.calculateRewards.selector,
                 player,
                 betId
             ),
@@ -217,7 +217,7 @@ contract DABookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DABets.calculateRewards.selector,
+                DAIMarkets.calculateRewards.selector,
                 player,
                 betId
             ),
@@ -250,7 +250,7 @@ contract DABookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DABets.calculateRewards.selector,
+                DAIMarkets.calculateRewards.selector,
                 player,
                 betId
             ),
@@ -280,7 +280,7 @@ contract DABookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DABets.calculateRewards.selector,
+                DAIMarkets.calculateRewards.selector,
                 player,
                 betId
             ),
@@ -305,24 +305,24 @@ contract DABookieTest is Test {
 
         vm.mockCall(
             address(bets),
-            abi.encodeWithSelector(DABets.addProposal.selector),
+            abi.encodeWithSelector(DAIMarkets.addProposal.selector),
             abi.encode(fakeId)
         );
 
-        DABets.Proposal memory _bet;
+        DAIMarkets.Proposal memory _bet;
         _bet.betsClosedAt = betsClosedAt;
         _bet.readyForValidationAt = betsClosedAt;
         _bet.validated = validated;
 
         vm.mockCall(
             address(bets),
-            abi.encodeWithSelector(DABets.getProposal.selector),
+            abi.encodeWithSelector(DAIMarkets.getProposal.selector),
             abi.encode(_bet)
         );
 
         vm.mockCall(
             address(bets),
-            abi.encodeWithSelector(DABets.placeBet.selector, fakeId),
+            abi.encodeWithSelector(DAIMarkets.placeBet.selector, fakeId),
             abi.encode(fakeId)
         );
     }
@@ -347,7 +347,7 @@ contract DABookieTest is Test {
         betId = _placeBet(proposalId, player, bet, stake);
         vm.mockCall(
             address(office),
-            abi.encodeWithSelector(DABOffice.isWinner.selector, betId),
+            abi.encodeWithSelector(DAIOffice.isWinner.selector, betId),
             abi.encode(isWinner)
         );
     }

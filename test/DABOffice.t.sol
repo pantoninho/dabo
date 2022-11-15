@@ -2,34 +2,34 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABO.sol";
+import "../src/DAIM.sol";
 
-contract DABOfficeTest is Test {
-    DABO public dabo;
-    DABOffice public office;
-    DABets public betsMock;
-    DABV public dabvMock;
-    DABets.Proposal[] public proposalsToBeValidated;
+contract DAIOfficeTest is Test {
+    DAIM public daim;
+    DAIOffice public office;
+    DAIMarkets public betsMock;
+    FACTx public factxMock;
+    DAIMarkets.Proposal[] public proposalsToBeValidated;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(dabo.dabv()));
-        vm.assume(a != address(dabo.dab()));
-        vm.assume(a != address(dabo.bookie()));
-        vm.assume(a != address(dabo.bets()));
-        vm.assume(a != address(dabo.treasury()));
-        vm.assume(a != address(dabo.office()));
+        vm.assume(a != address(daim.factx()));
+        vm.assume(a != address(daim.dab()));
+        vm.assume(a != address(daim.bookie()));
+        vm.assume(a != address(daim.bets()));
+        vm.assume(a != address(daim.treasury()));
+        vm.assume(a != address(daim.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
 
     function setUp() public {
-        dabo = new DABO();
-        office = dabo.office();
-        betsMock = dabo.bets();
-        dabvMock = dabo.dabv();
+        daim = new DAIM();
+        office = daim.office();
+        betsMock = daim.bets();
+        factxMock = daim.factx();
 
         while (proposalsToBeValidated.length > 0) {
             proposalsToBeValidated.pop();
@@ -335,7 +335,7 @@ contract DABOfficeTest is Test {
         bool validated,
         uint256[] memory betIds
     ) internal {
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         proposal.id = id;
         proposal.betsClosedAt = betsClosedAt;
         proposal.readyForValidationAt = readyForValidationAt;
@@ -347,13 +347,13 @@ contract DABOfficeTest is Test {
 
         vm.mockCall(
             address(betsMock),
-            abi.encodeWithSelector(DABets.getProposal.selector, id),
+            abi.encodeWithSelector(DAIMarkets.getProposal.selector, id),
             abi.encode(proposal)
         );
 
         vm.mockCall(
             address(betsMock),
-            abi.encodeWithSelector(DABets.getProposalsToBeValidated.selector),
+            abi.encodeWithSelector(DAIMarkets.getProposalsToBeValidated.selector),
             abi.encode(proposalsToBeValidated)
         );
 
@@ -361,7 +361,7 @@ contract DABOfficeTest is Test {
             vm.mockCall(
                 address(betsMock),
                 abi.encodeWithSelector(
-                    DABets.getProposalByBetId.selector,
+                    DAIMarkets.getProposalByBetId.selector,
                     betIds[i]
                 ),
                 abi.encode(proposal)
@@ -383,13 +383,13 @@ contract DABOfficeTest is Test {
         uint256[] memory betIds,
         uint256 readyForValidationAt
     ) public {
-        DABets.Proposal memory proposal;
+        DAIMarkets.Proposal memory proposal;
         proposal.id = id;
         proposal.readyForValidationAt = readyForValidationAt;
 
         vm.mockCall(
             address(betsMock),
-            abi.encodeWithSelector(DABets.getProposal.selector, id),
+            abi.encodeWithSelector(DAIMarkets.getProposal.selector, id),
             abi.encode(proposal)
         );
 
@@ -397,7 +397,7 @@ contract DABOfficeTest is Test {
             vm.mockCall(
                 address(betsMock),
                 abi.encodeWithSelector(
-                    DABets.getProposalByBetId.selector,
+                    DAIMarkets.getProposalByBetId.selector,
                     betIds[i]
                 ),
                 abi.encode(proposal)
@@ -417,15 +417,15 @@ contract DABOfficeTest is Test {
             validators[i] = address(uint160(a));
 
             vm.mockCall(
-                address(dabvMock),
+                address(factxMock),
                 abi.encodeWithSelector(ERC20.balanceOf.selector, validators[i]),
                 abi.encode(1)
             );
         }
 
         vm.mockCall(
-            address(dabvMock),
-            abi.encodeWithSelector(DABV.getOwners.selector),
+            address(factxMock),
+            abi.encodeWithSelector(FACTx.getOwners.selector),
             abi.encode(validators)
         );
 
