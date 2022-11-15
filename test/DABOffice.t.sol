@@ -2,49 +2,34 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "openzeppelin/token/ERC20/ERC20.sol";
-import "../src/DABOffice.sol";
-import "../src/DABookie.sol";
-import "../src/DABets.sol";
-import "../src/DABV.sol";
-import "../src/DAB.sol";
-import "../src/DABOTreasury.sol";
-
-contract DABookieMock is DABookie {
-    constructor(DABV _dabv) DABookie(_dabv) {}
-}
-
-contract DABetsMock is DABets {
-    constructor(DABookie _bookie) DABets(_bookie) {}
-}
-
-contract DABVMock is DABV {
-    constructor(IERC20 asset) DABV(asset) {}
-}
+import "../src/DABO.sol";
 
 contract DABOfficeTest is Test {
-    DABookie public bookieMock;
-    DABets public betsMock;
+    DABO public dabo;
     DABOffice public office;
+    DABets public betsMock;
     DABV public dabvMock;
     DABets.Proposal[] public proposalsToBeValidated;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
-        vm.assume(a != address(bookieMock));
-        vm.assume(a != address(betsMock));
-        vm.assume(a != address(office));
         vm.assume(a != address(vm));
+        vm.assume(a != address(dabo.dabv()));
+        vm.assume(a != address(dabo.dab()));
+        vm.assume(a != address(dabo.bookie()));
+        vm.assume(a != address(dabo.bets()));
+        vm.assume(a != address(dabo.treasury()));
+        vm.assume(a != address(dabo.office()));
+        vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
 
     function setUp() public {
-        DAB dab = new DAB(1000, new DABOTreasury(1000));
-        dabvMock = new DABV(dab);
-        bookieMock = new DABookieMock(dabvMock);
-        betsMock = new DABetsMock(bookieMock);
-        office = new DABOffice(bookieMock, betsMock, dabvMock);
+        dabo = new DABO();
+        office = dabo.office();
+        betsMock = dabo.bets();
+        dabvMock = dabo.dabv();
 
         while (proposalsToBeValidated.length > 0) {
             proposalsToBeValidated.pop();

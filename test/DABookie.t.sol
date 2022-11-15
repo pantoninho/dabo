@@ -2,36 +2,29 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABookie.sol";
-import "../src/DABets.sol";
-import "../src/DABV.sol";
-import "../src/DAB.sol";
-import "../src/DABOffice.sol";
-
-contract DABVMock is DABV {
-    constructor(IERC20 asset) DABV(asset) {}
-}
+import "../src/DABO.sol";
 
 contract DABookieTest is Test {
+    DABO public dabo;
     DABookie public bookie;
     DABets public bets;
-    DABV public dabvMock;
-    DABOTreasury public daboTreasury;
-    DAB public dab;
     DABOffice public office;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(bookie));
-        vm.assume(a != address(bets));
-        vm.assume(a != address(dab));
-        vm.assume(a != address(dabvMock));
-        vm.assume(a != address(daboTreasury));
-        vm.assume(a != address(office));
+        vm.assume(a != address(dabo));
+        vm.assume(a != address(dabo.dabv()));
+        vm.assume(a != address(dabo.dab()));
+        vm.assume(a != address(dabo.bookie()));
+        vm.assume(a != address(dabo.bets()));
+        vm.assume(a != address(dabo.treasury()));
+        vm.assume(a != address(dabo.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
+
+        emit log_address(address(dabo.dab()));
     }
 
     modifier assumeSufficientStake(uint256 stake) {
@@ -40,12 +33,10 @@ contract DABookieTest is Test {
     }
 
     function setUp() public {
-        daboTreasury = new DABOTreasury(1000);
-        dab = new DAB(1000, daboTreasury);
-        dabvMock = new DABV(dab);
-        bookie = new DABookie(dabvMock);
-        bets = bookie.bets();
-        office = bookie.office();
+        dabo = new DABO();
+        bookie = dabo.bookie();
+        bets = dabo.bets();
+        office = dabo.office();
     }
 
     function testCreateProposalWithoutBet(

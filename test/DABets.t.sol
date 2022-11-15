@@ -2,35 +2,31 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DABookie.sol";
-import "../src/DABets.sol";
-import "../src/DABV.sol";
-import "../src/DAB.sol";
-
-contract DABVMock is DABV {
-    constructor(IERC20 asset) DABV(asset) {}
-}
+import "../src/DABO.sol";
 
 contract DABookieTest is Test {
-    DABookie public bookie;
+    DABO public dabo;
     DABets public bets;
-    DABV public dabvMock;
+    DABookie public bookie;
 
     modifier assumeValidAddress(address a) {
         vm.assume(a > address(10));
         vm.assume(a != address(this));
         vm.assume(a != address(vm));
-        vm.assume(a != address(bookie));
-        vm.assume(a != address(bets));
+        vm.assume(a != address(dabo.dabv()));
+        vm.assume(a != address(dabo.dab()));
+        vm.assume(a != address(dabo.bookie()));
+        vm.assume(a != address(dabo.bets()));
+        vm.assume(a != address(dabo.treasury()));
+        vm.assume(a != address(dabo.office()));
         vm.assume(a != address(0x4e59b44847b379578588920cA78FbF26c0B4956C)); // create2deployer? wtf is this?
         _;
     }
 
     function setUp() public {
-        DAB dab = new DAB(1000, new DABOTreasury(1000));
-        dabvMock = new DABV(dab);
-        bookie = new DABookie(dabvMock);
-        bets = bookie.bets();
+        dabo = new DABO();
+        bets = dabo.bets();
+        bookie = dabo.bookie();
     }
 
     function testAddProposalNotBoookie() public {

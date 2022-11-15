@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "./DABO.sol";
 import "./DABets.sol";
 import "./DABOffice.sol";
-import "./DABV.sol";
 import "./Errors.sol";
 
 import "forge-std/console2.sol";
@@ -14,15 +14,14 @@ import "forge-std/console2.sol";
  * @notice  Creates betting proposals and places bets in the exchange for staking eth
  */
 contract DABookie {
-    DABets public bets;
-    DABOffice public office;
+    DABO public dabo;
+
     uint256 public constant minStake = 0.01 ether; // TODO: governance should be able to update this
     // address => betId[]
     mapping(address => uint256[]) betsToClaim;
 
-    constructor(DABV _dabv) {
-        bets = new DABets(this);
-        office = new DABOffice(this, bets, _dabv);
+    constructor(DABO _dabo) {
+        dabo = _dabo;
     }
 
     /**
@@ -91,9 +90,9 @@ contract DABookie {
 
         for (uint256 i = 0; i < claimables.length; i++) {
             uint256 betId = claimables[i];
-            bool isWinner = office.isWinner(betId);
+            bool isWinner = office().isWinner(betId);
             totalRewards += isWinner
-                ? bets.calculateRewards(msg.sender, betId)
+                ? bets().calculateRewards(msg.sender, betId)
                 : 0;
         }
 
@@ -121,6 +120,14 @@ contract DABookie {
         return betIds;
     }
 
+    function bets() internal view returns (DABets) {
+        return dabo.bets();
+    }
+
+    function office() internal view returns (DABOffice) {
+        return dabo.office();
+    }
+
     function _propose(
         address creator,
         string memory description,
@@ -137,7 +144,7 @@ contract DABookie {
         proposal.betsClosedAt = betsClosedAt;
         proposal.readyForValidationAt = readyForValidationAt;
 
-        proposalId = bets.addProposal(proposal);
+        proposalId = bets().addProposal(proposal);
 
         return proposalId;
     }
@@ -154,7 +161,7 @@ contract DABookie {
         ensureBetsAreOpen(proposalId)
         returns (uint256 betId)
     {
-        betId = bets.placeBet(proposalId, player, bet, stake);
+        betId = bets().placeBet(proposalId, player, bet, stake);
         betsToClaim[player].push(betId);
     }
 
@@ -173,14 +180,14 @@ contract DABookie {
     }
 
     modifier ensureBetsAreOpen(uint256 proposalId) {
-        if (block.timestamp > bets.getProposal(proposalId).betsClosedAt) {
+        if (block.timestamp > bets().getProposal(proposalId).betsClosedAt) {
             revert ClosedBets();
         }
         _;
     }
 
     modifier ensureProposalIsValidated(uint256 proposalId) {
-        if (!bets.getProposal(proposalId).validated) {
+        if (!bets().getProposal(proposalId).validated) {
             revert ProposalNotValidated();
         }
         _;

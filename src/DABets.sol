@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./DABookie.sol";
+import "./DABO.sol";
 import "./Errors.sol";
 
 /**
@@ -24,7 +25,8 @@ contract DABets {
         bool validated;
     }
 
-    DABookie bookie;
+    DABO dabo;
+
     // [proposalId]
     uint256[] proposalIds;
     mapping(uint256 => Proposal) proposals;
@@ -37,8 +39,8 @@ contract DABets {
     // address => betId => stake
     mapping(address => mapping(uint256 => uint256)) playerStakes;
 
-    constructor(DABookie _bookie) {
-        bookie = _bookie;
+    constructor(DABO _dabo) {
+        dabo = _dabo;
     }
 
     /**
@@ -233,7 +235,14 @@ contract DABets {
     }
 
     modifier onlyBookie() {
-        if (msg.sender != address(bookie)) {
+        if (msg.sender != address(dabo.bookie())) {
+            revert Unauthorized();
+        }
+        _;
+    }
+
+    modifier onlyOffice() {
+        if (msg.sender != address(dabo.office())) {
             revert Unauthorized();
         }
         _;
