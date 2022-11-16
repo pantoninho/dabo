@@ -1,5 +1,5 @@
 {
-  "name": "DAIM",
+  "name": "daim",
   "version": "0.0.0",
   "description": "DAIM validates bets in return for a fee.",
   "repository": {
@@ -15,5 +15,8 @@
   "homepage": "https://github.com/pantoninho/dabo#readme",
   "devDependencies": {
     "@changesets/cli": "^2.25.2"
+  },
+  "scripts": {
+    "forge:script": "forge script --rpc-url $RPC_URL --broadcast -vvvv --private-key $DEPLOYER_KEY"
   }
 }
