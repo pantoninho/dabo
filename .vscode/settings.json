@@ -2,8 +2,8 @@
   "solidity.packageDefaultDependenciesContractsDirectory": "src",
   "solidity.packageDefaultDependenciesDirectory": "lib",
   "solidity.remappings": [
-    "forge-std/=lib/forge-std/src/",
-    "openzeppelin/=lib/openzeppelin-contracts/contracts/",
-    "ds-test/=lib/forge-std/lib/ds-test/src/"
+    "forge-std/=smart-contracts/lib/forge-std/src/",
+    "openzeppelin/=smart-contracts/lib/openzeppelin-contracts/contracts/",
+    "ds-test/=smart-contracts/lib/forge-std/lib/ds-test/src/"
   ]
 }
