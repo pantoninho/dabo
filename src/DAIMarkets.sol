@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./DAIBookie.sol";
-import "./DAIM.sol";
+import {DAIM} from "./DAIM.sol";
+import {DAIBookie} from "./DAIBookie.sol";
 import "./Errors.sol";
 
 /**

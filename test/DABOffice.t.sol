@@ -2,7 +2,13 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DAIM.sol";
+import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
+import {DAIM} from "../src/DAIM.sol";
+import {DAIMarkets} from "../src/DAIMarkets.sol";
+import {DAIOffice} from "../src/DAIOffice.sol";
+import {DAIBookie} from "../src/DAIBookie.sol";
+import {FACTx} from "../src/FACTx.sol";
+import "../src/Errors.sol";
 
 contract DAIOfficeTest is Test {
     DAIM public daim;
@@ -353,7 +359,9 @@ contract DAIOfficeTest is Test {
 
         vm.mockCall(
             address(betsMock),
-            abi.encodeWithSelector(DAIMarkets.getProposalsToBeValidated.selector),
+            abi.encodeWithSelector(
+                DAIMarkets.getProposalsToBeValidated.selector
+            ),
             abi.encode(proposalsToBeValidated)
         );
 

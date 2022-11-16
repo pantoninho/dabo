@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./FACT.sol";
+import {FACT} from "./FACT.sol";
 
 // TODO: is there some kind of standard for this type of contract? check ERC4646
 /**

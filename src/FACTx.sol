@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "openzeppelin/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
-import "openzeppelin/token/ERC20/extensions/ERC4626.sol";
+import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
+import {ERC4626} from "openzeppelin/token/ERC20/extensions/ERC4626.sol";
+import {IERC20} from "openzeppelin/interfaces/IERC20.sol";
+import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 
 contract FACTx is ERC4626, ERC20Permit, ERC20Votes {
     address[] owners;

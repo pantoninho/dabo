@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "forge-std/console2.sol";
-import "openzeppelin/utils/structs/EnumerableSet.sol";
-import "openzeppelin/utils/structs/EnumerableMap.sol";
-
-import "./DAIM.sol";
-import "./DAIMarkets.sol";
-import "./FACTx.sol";
+import {DAIM} from "./DAIM.sol";
+import {DAIMarkets} from "./DAIMarkets.sol";
+import {FACTx} from "./FACTx.sol";
 import "./Errors.sol";
 
 /**
@@ -16,8 +12,6 @@ import "./Errors.sol";
  * @notice  TODO: write this
  */
 contract DAIOffice {
-    using EnumerableSet for EnumerableSet.UintSet;
-
     // a validation represents a bet(s) chosen as correct by validators for a specific proposal.
     // if two validators select the same bet as correct, both will contribute to the same validation weight
     struct ProposalValidation {
@@ -123,7 +117,9 @@ contract DAIOffice {
     }
 
     function validate(uint256[] memory betIds) external onlyValidators {
-        DAIMarkets.Proposal memory proposal = bets().getProposalByBetId(betIds[0]);
+        DAIMarkets.Proposal memory proposal = bets().getProposalByBetId(
+            betIds[0]
+        );
 
         if (!_isValidatorOf(msg.sender, proposal.id)) {
             revert Unauthorized();

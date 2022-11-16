@@ -2,7 +2,10 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/DAIM.sol";
+import {DAIM} from "../src/DAIM.sol";
+import {DAIMarkets} from "../src/DAIMarkets.sol";
+import {DAIBookie} from "../src/DAIBookie.sol";
+import "../src/Errors.sol";
 
 contract DAIBookieTest is Test {
     DAIM public daim;

@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
-import "forge-std/console2.sol";
 
-import "./FACT.sol";
-import "./DAIMarkets.sol";
-import "./DAIOffice.sol";
-import "./DAIBookie.sol";
-import "./DAIMTreasury.sol";
-import "./FACTx.sol";
+import {FACT} from "./FACT.sol";
+import {DAIMarkets} from "./DAIMarkets.sol";
+import {DAIOffice} from "./DAIOffice.sol";
+import {DAIBookie} from "./DAIBookie.sol";
+import {DAIMTreasury} from "./DAIMTreasury.sol";
+import {FACTx} from "./FACTx.sol";
 import "./Errors.sol";
 
 /**

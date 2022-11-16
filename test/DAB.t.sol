@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "../src/FACT.sol";
-import "../src/DAIMTreasury.sol";
+import {FACT} from "../src/FACT.sol";
+import {DAIMTreasury} from "../src/DAIMTreasury.sol";
 
 contract FACTTest is Test {
     DAIMTreasury public treasury;
