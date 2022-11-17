@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 
 import { useDAIM } from '../../../smart-contracts/daim';
+import Market from '../../../components/Market';
 
 const TrendingMarkets = () => {
   const daim = useDAIM();
@@ -15,10 +16,9 @@ const TrendingMarkets = () => {
       {data.map((market) => {
         return (
           <Market
-            id={market.id._hex}
-            key={market.id._hex}
-            creator={market.creator}
+            key={market.id}
             description={market.description}
+            betsClosedAt={market.betsClosedAt}
           />
         );
       })}
@@ -27,13 +27,3 @@ const TrendingMarkets = () => {
 };
 
 export default TrendingMarkets;
-
-const Market = ({ id, description, creator, betsClosedAt }) => {
-  return (
-    <div className="rounded-lg border-2 border-zinc-800 p-2 dark:border-white">
-      <h3>creator: {creator}</h3>
-      <br />
-      <h3>{description}</h3>
-    </div>
-  );
-};
