@@ -179,11 +179,16 @@ contract DAIMarkets {
         rewards = (totalStake * playerStake) / betStake;
     }
 
+    function getNumberOfProposals() external view returns (uint256) {
+        return proposalIds.length;
+    }
+
     function getActiveProposals()
         external
         view
         returns (Proposal[] memory activeProposals)
     {
+        activeProposals = new Proposal[](proposalIds.length);
         Proposal memory proposal;
         uint256 counter;
 
@@ -196,7 +201,7 @@ contract DAIMarkets {
             }
 
             // bets already closed
-            if (proposal.betsClosedAt > block.timestamp) {
+            if (proposal.betsClosedAt < block.timestamp) {
                 continue;
             }
 

@@ -14,9 +14,13 @@
   },
   "homepage": "https://github.com/pantoninho/dabo#readme",
   "devDependencies": {
-    "@changesets/cli": "^2.25.2"
+    "@changesets/cli": "^2.25.2",
+    "turbo": "^1.6.3"
   },
   "scripts": {
     "forge:script": "forge script --rpc-url $RPC_URL --broadcast -vvvv --private-key $DEPLOYER_KEY"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2"
   }
 }

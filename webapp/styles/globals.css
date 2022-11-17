@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  font-family: 'Inconsolata', monospace;
+}
+
+:root.dark {
+  background-color: rgb(39, 39, 42);
+  color: white;
+}
+
+:root.light {
+  background-color: white;
+  color: rgb(24, 24, 27);
+}
