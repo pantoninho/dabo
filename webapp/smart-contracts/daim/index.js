@@ -121,6 +121,7 @@ function processMarket(market) {
     readyForValidationAt: timestampToLocalizedString(
       market.readyForValidationAt
     ),
+    betPool: ethers.utils.formatEther(market.betPool),
   };
 }
 

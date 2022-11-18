@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useMarketBets } from '../smart-contracts/daim';
 import stringToColor from 'string-to-color';
 
-const Market = ({ id, description, betsClosedAt }) => {
+const Market = ({ id, description, betsClosedAt, betPool }) => {
   const { bets, isLoading, error } = useMarketBets(id);
 
   if (error) return <div>failed to load</div>;
@@ -11,26 +11,31 @@ const Market = ({ id, description, betsClosedAt }) => {
   const colorBars = bets.map(toColorBar);
 
   return (
-    <div className="rounded-lg border-2 border-zinc-800 p-2 dark:border-white">
-      <h1>{id}</h1>
-      <h3>{description}</h3>
-      <h3>bets close at: {betsClosedAt}</h3>
+    <div className="rounded-lg border-2 border-zinc-800 p-4 dark:border-white">
+      <div className="mb-8">
+        <div className="mb-4 flex justify-between gap-12">
+          <h3 className="min-w-[200px] max-w-xs text-xl">{description}</h3>
+          <h3 className="text-xl">{betPool} ETH</h3>
+        </div>
 
-      <ColorBars>
-        {colorBars.map((bet) => (
-          <ColorBar
-            key={bet.color}
-            label={bet.label}
-            color={bet.color}
-            share={bet.stakeShare}
-          />
-        ))}
-      </ColorBars>
-
-      <div className="mt-4 flex justify-end">
-        <ButtonLink href={`/markets/${encodeURIComponent(id)}`}>
-          Place Bet
-        </ButtonLink>
+        <ColorBars>
+          {colorBars.map((bet) => (
+            <ColorBar
+              key={bet.color}
+              label={bet.label}
+              color={bet.color}
+              share={bet.stakeShare}
+            />
+          ))}
+        </ColorBars>
+      </div>
+      <div className="flex items-center justify-end">
+        <div className="flex flex-col gap-2">
+          <ButtonLink href={`/markets/${encodeURIComponent(id)}`}>
+            Place Bet
+          </ButtonLink>
+          <h5 className="text-xs">bets close at {betsClosedAt}</h5>
+        </div>
       </div>
     </div>
   );
@@ -42,7 +47,7 @@ const ButtonLink = ({ children, href, className }) => {
   return (
     <Link
       href={href}
-      className={`rounded-lg border-2 border-zinc-900 px-2 py-1 hover:bg-zinc-800 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-zinc-900 ${className}`}
+      className={`rounded-lg border-2 border-zinc-900 px-2 py-1 text-center hover:bg-zinc-800 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-zinc-900 ${className}`}
     >
       {children}
     </Link>
@@ -61,7 +66,7 @@ const toColorBar = (bet, i, bets) => {
 
 const ColorBars = ({ children }) => {
   return (
-    <div className="border-1 flex justify-between overflow-hidden rounded-md border-zinc-800 dark:border-white">
+    <div className="border-1 flex h-2 justify-between overflow-hidden rounded-md border-zinc-800 dark:border-white">
       {children}
     </div>
   );
@@ -70,7 +75,7 @@ const ColorBars = ({ children }) => {
 const ColorBar = ({ color, share }) => {
   return (
     <div className="flex" style={{ width: `${share}%` }}>
-      <div className="h-4 w-full" style={{ backgroundColor: `${color}` }}></div>
+      <div className="w-full" style={{ backgroundColor: `${color}` }}></div>
     </div>
   );
 };

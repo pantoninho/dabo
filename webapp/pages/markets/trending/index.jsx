@@ -16,6 +16,7 @@ const TrendingMarkets = () => {
             key={market.id}
             description={market.description}
             betsClosedAt={market.betsClosedAt}
+            betPool={market.betPool}
           />
         );
       })}
