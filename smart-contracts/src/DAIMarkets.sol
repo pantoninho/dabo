@@ -21,7 +21,7 @@ contract DAIMarkets {
         uint256 betsClosedAt;
         uint256 readyForValidationAt;
         uint256 betPool;
-        string[] bets;
+        uint256[] bets;
         bool validated;
     }
 
@@ -87,7 +87,7 @@ contract DAIMarkets {
         // bet does not exist yet, add it to proposal bets array
         // and link their ids in betToProposal
         if (betStakes[betId] == 0) {
-            proposals[proposalId].bets.push(bet);
+            proposals[proposalId].bets.push(betId);
             betToProposal[betId] = proposalId;
             betIdToString[betId] = bet;
         }
@@ -155,6 +155,15 @@ contract DAIMarkets {
         returns (uint256 stake)
     {
         return playerStakes[player][betId];
+    }
+
+    function getBetDescription(uint256 betId)
+        external
+        view
+        ensureBetExists(betId)
+        returns (string memory description)
+    {
+        return betIdToString[betId];
     }
 
     /**
