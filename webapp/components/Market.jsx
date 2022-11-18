@@ -2,7 +2,14 @@ import Link from 'next/link';
 import { useMarketBets } from '../smart-contracts/daim';
 import stringToColor from 'string-to-color';
 
-const Market = ({ id, description, betsClosedAt, betPool }) => {
+const Market = ({
+  id,
+  description,
+  category,
+  betsClosedAt,
+  betPool,
+  className,
+}) => {
   const { bets, isLoading, error } = useMarketBets(id);
 
   if (error) return <div>failed to load</div>;
@@ -11,10 +18,15 @@ const Market = ({ id, description, betsClosedAt, betPool }) => {
   const colorBars = bets.map(toColorBar);
 
   return (
-    <div className="rounded-lg border-2 border-zinc-800 p-4 dark:border-white">
+    <div
+      className={`rounded-lg border-2 border-zinc-800 p-4 dark:border-white ${className}`}
+    >
       <div className="mb-8">
         <div className="mb-4 flex justify-between gap-12">
-          <h3 className="min-w-[200px] max-w-xs text-xl">{description}</h3>
+          <div>
+            <div className="text-md">{category}</div>
+            <h3 className="min-w-[300px] max-w-xs text-xl">{description}</h3>
+          </div>
           <h3 className="text-xl">{betPool} ETH</h3>
         </div>
 

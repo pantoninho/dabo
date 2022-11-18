@@ -88,13 +88,21 @@ const useDAIM = () => {
   const contract = new ethers.Contract(address, daimAbi, library);
 
   return {
-    propose: async ({ description, betsClosedAt, readyForValidationAt }) => {
+    propose: async ({
+      description,
+      category,
+      betsClosedAt,
+      readyForValidationAt,
+    }) => {
       const bookieAddress = await contract.bookie();
       let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
       bookie = bookie.connect(library.getSigner());
 
-      await bookie[`propose(string,uint256,uint256)`](
+      console.log('category is:', category);
+
+      await bookie[`propose(string,string,uint256,uint256)`](
         description,
+        category,
         localizedStringToTimestamp(betsClosedAt),
         localizedStringToTimestamp(readyForValidationAt)
       );

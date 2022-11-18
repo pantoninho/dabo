@@ -17,6 +17,7 @@ contract DAIMarkets {
     struct Proposal {
         uint256 id;
         string description;
+        string category;
         address creator;
         uint256 betsClosedAt;
         uint256 readyForValidationAt;

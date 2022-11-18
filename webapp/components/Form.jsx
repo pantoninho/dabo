@@ -10,7 +10,7 @@ export const Input = ({ type, label, name, onChange, value }) => {
         {label}
       </label>
       <input
-        className="flex-1 rounded-lg border-2 border-zinc-800 bg-white py-2 px-4 focus:outline-none dark:border-white dark:bg-zinc-800"
+        className="flex-1 rounded-lg border-2 border-zinc-800 bg-white px-4 py-2 focus:outline-none dark:border-white dark:bg-zinc-800"
         id={name}
         type={type}
         name={name}

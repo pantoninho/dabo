@@ -113,6 +113,11 @@
                 "type": "string"
             },
             {
+                "internalType": "string",
+                "name": "category",
+                "type": "string"
+            },
+            {
                 "internalType": "uint256",
                 "name": "betsClosedAt",
                 "type": "uint256"
@@ -144,6 +149,11 @@
             {
                 "internalType": "string",
                 "name": "bet",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "category",
                 "type": "string"
             },
             {

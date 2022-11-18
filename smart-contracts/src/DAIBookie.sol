@@ -30,6 +30,7 @@ contract DAIBookie {
      */
     function propose(
         string calldata description, // TODO: calldata or memory?
+        string calldata category,
         uint256 betsClosedAt,
         uint256 readyForValidationAt
     ) external returns (uint256 proposalId) {
@@ -37,6 +38,7 @@ contract DAIBookie {
             _propose(
                 msg.sender,
                 description,
+                category,
                 betsClosedAt,
                 readyForValidationAt
             );
@@ -53,12 +55,14 @@ contract DAIBookie {
     function propose(
         string calldata description, // TODO: calldata or memory?
         string calldata bet,
+        string calldata category,
         uint256 betsClosedAt,
         uint256 readyForValidationAt
     ) external payable returns (uint256 proposalId) {
         proposalId = _propose(
             msg.sender,
             description,
+            category,
             betsClosedAt,
             readyForValidationAt
         );
@@ -129,6 +133,7 @@ contract DAIBookie {
     function _propose(
         address creator,
         string memory description,
+        string memory category,
         uint256 betsClosedAt,
         uint256 readyForValidationAt
     ) internal ensureValidAddress(creator) returns (uint256 proposalId) {
@@ -138,6 +143,7 @@ contract DAIBookie {
 
         DAIMarkets.Proposal memory proposal;
         proposal.description = description;
+        proposal.category = category;
         proposal.creator = msg.sender;
         proposal.betsClosedAt = betsClosedAt;
         proposal.readyForValidationAt = readyForValidationAt;

@@ -57,6 +57,7 @@ const MarketBets = ({ onSubmit }) => {
             value={value}
             onChange={setValue}
           />
+
           <Button onClick={onButtonClick}>New Bet</Button>
         </Form>
       </li>

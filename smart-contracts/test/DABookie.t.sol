@@ -54,7 +54,7 @@ contract DAIBookieTest is Test {
 
         hoax(creator);
         vm.warp(when);
-        uint256 id = bookie.propose("", 0, 0);
+        uint256 id = bookie.propose("", "", 0, 0);
 
         assertEq(id, proposalId);
     }
@@ -72,7 +72,7 @@ contract DAIBookieTest is Test {
 
         hoax(creator, stake);
         vm.warp(when);
-        uint256 id = bookie.propose{value: stake}("", bet, 0, 0);
+        uint256 id = bookie.propose{value: stake}("", "", bet, 0, 0);
 
         assertEq(id, proposalId);
         assertEq(address(bookie).balance, stake);
@@ -89,7 +89,7 @@ contract DAIBookieTest is Test {
         hoax(creator, stake);
         vm.warp(betsClosedAt);
         vm.expectRevert(InvalidDates.selector);
-        bookie.propose("", betsClosedAt, readyForValidationAt);
+        bookie.propose("", "", betsClosedAt, readyForValidationAt);
     }
 
     function testCreateProposalWithBetInsufficientStake(
@@ -100,7 +100,7 @@ contract DAIBookieTest is Test {
 
         hoax(creator, stake);
         vm.expectRevert(InsufficientStake.selector);
-        bookie.propose{value: stake}("", "", 0, 100);
+        bookie.propose{value: stake}("", "", "", 0, 100);
     }
 
     function testPlaceBetActiveProposal(
