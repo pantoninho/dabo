@@ -98,8 +98,6 @@ const useDAIM = () => {
       let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
       bookie = bookie.connect(library.getSigner());
 
-      console.log('category is:', category);
-
       await bookie[`propose(string,string,uint256,uint256)`](
         description,
         category,

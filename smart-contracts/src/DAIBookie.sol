@@ -18,6 +18,13 @@ contract DAIBookie {
     // address => betId[]
     mapping(address => uint256[]) betsToClaim;
 
+    event MarketProposed(
+        uint256 indexed id,
+        string indexed category,
+        string description,
+        address proposer
+    );
+
     constructor(DAIM _daim) {
         daim = _daim;
     }
@@ -150,6 +157,7 @@ contract DAIBookie {
 
         proposalId = bets().addProposal(proposal);
 
+        emit MarketProposed(proposalId, category, description, msg.sender);
         return proposalId;
     }
 
