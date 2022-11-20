@@ -5,6 +5,7 @@ import bookieAbi from './bookie.abi.json';
 import marketsAbi from './daimarkets.abi.json';
 import treasuryAbi from './treasury.abi.json';
 import factAbi from './fact.abi.json';
+import factxAbi from './factx.abi.json';
 import useSWR from 'swr';
 
 const address = process.env.NEXT_PUBLIC_DAIM_ADDRESS;
@@ -94,16 +95,54 @@ function useFACT() {
   const fetcher = async () => {
     const factAddress = await contract.fact();
     const fact = new ethers.Contract(factAddress, factAbi, library);
+    const factxAddress = await contract.factx();
     const totalSupply = await fact.totalSupply();
-    return ethers.utils.formatEther(totalSupply);
+
+    const address = await library.getSigner().getAddress();
+    const allowance = await fact.allowance(address, factxAddress);
+
+    return {
+      totalSupply: ethers.utils.formatEther(totalSupply),
+      allowance: ethers.utils.formatEther(allowance),
+    };
   };
 
   const { data, error } = useSWR(`getFactInfo()`, fetcher);
 
   return {
-    totalSupply: data,
+    totalSupply: data && data.totalSupply,
+    allowance: data && data.allowance,
     isLoading: !error && !data,
     error: error,
+    approveForStaking: async () => {
+      const factAddress = await contract.fact();
+      const factxAddress = await contract.factx();
+      let fact = new ethers.Contract(factAddress, factAbi, library);
+      const signer = library.getSigner();
+      fact = fact.connect(signer);
+
+      return fact.approve(factxAddress, ethers.constants.MaxUint256);
+    },
+  };
+}
+
+function useFACTx() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+  const fetcher = async () => {
+    const factxAddress = await contract.factx();
+    let factx = new ethers.Contract(factxAddress, factxAbi, library);
+    const totalSupply = await factx.totalSupply();
+
+    return ethers.utils.formatEther(totalSupply);
+  };
+
+  const { data, error } = useSWR(`getFACTxInfo()`, fetcher);
+
+  return {
+    totalSupply: data,
+    isLoading: !error && !data,
+    error,
   };
 }
 
@@ -142,6 +181,13 @@ function useTreasury() {
 
       return tx;
     },
+    sell: async (fact) => {
+      const treasuryAddress = await contract.treasury();
+      let treasury = new ethers.Contract(treasuryAddress, treasuryAbi, library);
+      treasury = treasury.connect(library.getSigner());
+
+      await treasury.withdraw(ethers.utils.parseEther(fact.toString()));
+    },
     initialize: async ({ fact, eth }) => {
       const treasuryAddress = await contract.treasury();
       let treasury = new ethers.Contract(treasuryAddress, treasuryAbi, library);
@@ -150,6 +196,28 @@ function useTreasury() {
       await treasury.initialTrade(ethers.utils.parseEther(fact), {
         value: ethers.utils.parseEther(eth),
       });
+    },
+    stake: async (fact) => {
+      const factxAddress = await contract.factx();
+      let factx = new ethers.Contract(factxAddress, factxAbi, library);
+      factx = factx.connect(library.getSigner());
+      const address = await library.getSigner().getAddress();
+
+      console.log('in ether:', ethers.utils.parseEther(fact.toString()));
+
+      await factx.deposit(ethers.utils.parseEther(fact.toString()), address);
+    },
+    unstake: async (fact) => {
+      const factxAddress = await contract.factx();
+      let factx = new ethers.Contract(factxAddress, factxAbi, library);
+      factx = factx.connect(library.getSigner());
+      const address = await library.getSigner().getAddress();
+
+      await factx.redeem(
+        ethers.utils.parseEther(fact.toString()),
+        address,
+        address
+      );
     },
   };
 }
@@ -196,6 +264,7 @@ export {
   useTreasury,
   useBookie,
   useFACT,
+  useFACTx,
 };
 
 function processMarket(market) {

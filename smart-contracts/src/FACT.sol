@@ -29,6 +29,10 @@ contract FACT is ERC20 {
         _mint(account, amount);
     }
 
+    function burn(address account, uint256 amount) external onlyTreasury {
+        _burn(account, amount);
+    }
+
     /**
      * @notice  mints FACT tokens to a target account. reverts if maxTotalSupply has been reached
      * @param   account  target account

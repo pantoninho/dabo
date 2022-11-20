@@ -1,14 +1,12 @@
 import React from 'react';
 import Button from '../../components/Button';
 import { Form, Input } from '../../components/Form';
-import { useFACT, useTreasury } from '../../smart-contracts/daim';
+import { useFACT, useFACTx, useTreasury } from '../../smart-contracts/daim';
 
 const TreasuryDashboard = () => {
-  const { isPriceSet, factPrice, balance, initialize, trade, error } =
-    useTreasury();
+  const { isPriceSet, factPrice, balance, initialize, stake } = useTreasury();
   const { totalSupply } = useFACT();
-
-  console.log({ isPriceSet, error, totalSupply });
+  const { totalSupply: factxSupply } = useFACTx();
 
   return (
     <div className="flex-col flex items-center">
@@ -19,8 +17,10 @@ const TreasuryDashboard = () => {
             factPrice={factPrice}
             balance={balance}
             issuedFacts={totalSupply}
+            stakedFacts={factxSupply}
           />
-          <TradeBox onSubmit={trade} />
+          <BuyFactBox />
+          <StakeFactBox onSubmit={stake} />
         </div>
       ) : (
         <InitTreasury initialize={initialize} />
@@ -31,13 +31,13 @@ const TreasuryDashboard = () => {
 
 export default TreasuryDashboard;
 
-const TreasuryStats = ({ balance, issuedFacts }) => {
+const TreasuryStats = ({ balance, issuedFacts, stakedFacts }) => {
   return (
     <div className="flex min-w-fit flex-1 flex-wrap items-center justify-center gap-16 rounded-lg border-2 border-zinc-800 py-4 px-8 dark:border-white">
       <DashboardStat value={issuedFacts} label="Issued Facts" />
       <DashboardStat value={balance} label="ETH in Treasury" />
       <DashboardStat value={balance / issuedFacts} label="ETH/FACT" />
-      <DashboardStat value={0} label="Staked FACTs" />
+      <DashboardStat value={stakedFacts} label="Staked FACTs" />
     </div>
   );
 };
@@ -103,11 +103,11 @@ const InitTreasury = ({ initialize }) => {
   );
 };
 
-const TradeBox = ({ onSubmit }) => {
+const BuyFactBox = () => {
   const [fact, setFact] = React.useState(0);
   const [eth, setEth] = React.useState(0);
 
-  const { balance } = useTreasury();
+  const { balance, trade, sell } = useTreasury();
   const { totalSupply } = useFACT();
 
   const price = balance / totalSupply;
@@ -124,9 +124,14 @@ const TradeBox = ({ onSubmit }) => {
     setFact(value / price);
   };
 
-  const onButtonClick = (e) => {
+  const onBuy = (e) => {
     e.preventDefault();
-    onSubmit(eth);
+    trade(eth);
+  };
+
+  const onSell = (e) => {
+    e.preventDefault();
+    sell(fact);
   };
 
   return (
@@ -148,12 +153,68 @@ const TradeBox = ({ onSubmit }) => {
           min={0}
           onChange={setEthAndUpdate}
         />
-        <Button type="submit" onClick={onButtonClick}>
-          Buy {fact} FACT
-        </Button>
+        <div className="flex justify-around">
+          <Button type="submit" onClick={onBuy}>
+            Buy {fact} FACT
+          </Button>
+          <Button type="submit" onClick={onSell}>
+            Sell {fact} FACT
+          </Button>
+        </div>
         <div className="self-end text-sm font-thin">
           <h3>CURRENT PRICE: {price} ETH/FACT</h3>
         </div>
+      </Form>
+    </div>
+  );
+};
+
+const StakeFactBox = () => {
+  const [fact, setFact] = React.useState(0);
+  const { allowance, approveForStaking } = useFACT();
+  const { stake, unstake } = useTreasury();
+  console.log(allowance);
+
+  const onStake = (e) => {
+    e.preventDefault();
+    stake(fact);
+  };
+
+  const onUnstake = (e) => {
+    e.preventDefault();
+    unstake(fact);
+  };
+
+  const onApprove = (e) => {
+    e.preventDefault();
+    approveForStaking();
+  };
+
+  return (
+    <div className="flex rounded-lg border-2 border-zinc-800 dark:border-white">
+      <Form>
+        <Input
+          type="number"
+          label="FACT"
+          labelClassName="w-20 text-center"
+          value={fact}
+          min={0}
+          onChange={setFact}
+        />
+        {allowance == 0 ? (
+          <Button type="submit" onClick={onApprove}>
+            Approve FACT
+          </Button>
+        ) : (
+          <div className="flex justify-around">
+            <Button type="submit" onClick={onStake}>
+              Stake {fact} FACT
+            </Button>
+            <Button type="submit" onClick={onUnstake}>
+              Unstake {fact} FACT
+            </Button>
+          </div>
+        )}
       </Form>
     </div>
   );

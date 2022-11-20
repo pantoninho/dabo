@@ -18,6 +18,8 @@ contract DAIMTreasury {
     error PositiveAmount();
 
     event InitialTrade();
+    error NotEnoughFunds();
+    error TransferError();
 
     bool private priceIsSet;
 
@@ -31,9 +33,22 @@ contract DAIMTreasury {
         }
 
         uint256 balanceBefore = address(this).balance - msg.value;
-        console2.logUint(balanceBefore);
-
         fact.mint(msg.sender, (msg.value * fact.totalSupply()) / balanceBefore);
+    }
+
+    function withdraw(uint256 amount) external {
+        if (fact.balanceOf(msg.sender) < amount) {
+            revert NotEnoughFunds();
+        }
+
+        uint256 value = (amount * address(this).balance) / fact.totalSupply();
+
+        fact.burn(msg.sender, amount);
+        (bool success, ) = address(msg.sender).call{value: value}("");
+
+        if (!success) {
+            revert TransferError();
+        }
     }
 
     function initialTrade(uint256 amount) external payable {
