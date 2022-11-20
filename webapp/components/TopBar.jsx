@@ -6,16 +6,16 @@ import ThemeToggler from './ThemeToggler';
 
 export const TopBar = () => {
   return (
-    <div className="flex items-center h-14">
-      <div className="flex-1 w-3/4">
-        <h1 className="text-lg px-4">
+    <div className="flex h-14 items-center">
+      <div className="w-3/4 flex-1">
+        <h1 className="px-4 text-lg">
           Decentralized Autonomous Information Markets
         </h1>
       </div>
-      <div className="flex-none flex justify-center">
+      <div className="flex flex-none justify-center">
         <ConnectWalletButton />
       </div>
-      <div className="flex-none w-8 h-8">
+      <div className="h-8 w-8 flex-none">
         <ThemeToggler />
       </div>
     </div>

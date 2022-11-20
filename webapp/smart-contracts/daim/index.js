@@ -3,12 +3,15 @@ import { ethers } from 'ethers';
 import daimAbi from './daim.abi.json';
 import bookieAbi from './bookie.abi.json';
 import marketsAbi from './daimarkets.abi.json';
+import treasuryAbi from './treasury.abi.json';
+import factAbi from './fact.abi.json';
 import useSWR from 'swr';
 
 const address = process.env.NEXT_PUBLIC_DAIM_ADDRESS;
 
 function useMarket(id) {
   const { library } = useWeb3React();
+  const bookie = useBookie();
   const contract = new ethers.Contract(address, daimAbi, library);
 
   const fetcher = (id) => async () => {
@@ -25,6 +28,7 @@ function useMarket(id) {
     market: data && processMarket(data),
     isLoading: !error && !data,
     error: error,
+    placeBet: ({ bet, value }) => bookie.placeBet({ id, bet, value }),
   };
 }
 
@@ -83,9 +87,82 @@ function useMarketBets(marketId) {
   };
 }
 
-const useDAIM = () => {
+function useFACT() {
   const { library } = useWeb3React();
   const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const factAddress = await contract.fact();
+    const fact = new ethers.Contract(factAddress, factAbi, library);
+    const totalSupply = await fact.totalSupply();
+    return ethers.utils.formatEther(totalSupply);
+  };
+
+  const { data, error } = useSWR(`getFactInfo()`, fetcher);
+
+  return {
+    totalSupply: data,
+    isLoading: !error && !data,
+    error: error,
+  };
+}
+
+function useTreasury() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const treasuryAddress = await contract.treasury();
+    const treasury = new ethers.Contract(treasuryAddress, treasuryAbi, library);
+    const isPriceSet = await treasury.isPriceSet();
+    const balance = await library.getBalance(treasury.address);
+
+    return {
+      isPriceSet,
+      balance: ethers.utils.formatEther(balance),
+    };
+  };
+
+  const { data, error } = useSWR(`getTreasuryInfo()`, fetcher);
+
+  return {
+    isPriceSet: data && data.isPriceSet,
+    factPrice: data && data.factPrice,
+    balance: data && data.balance,
+    isLoading: !error && !data,
+    error: error,
+    trade: async (eth) => {
+      const treasuryAddress = await contract.treasury();
+      const signer = library.getSigner();
+
+      const tx = await signer.sendTransaction({
+        to: treasuryAddress,
+        value: ethers.utils.parseEther(eth.toString()),
+      });
+
+      return tx;
+    },
+    initialize: async ({ fact, eth }) => {
+      const treasuryAddress = await contract.treasury();
+      let treasury = new ethers.Contract(treasuryAddress, treasuryAbi, library);
+      treasury = treasury.connect(library.getSigner());
+
+      await treasury.initialTrade(ethers.utils.parseEther(fact), {
+        value: ethers.utils.parseEther(eth),
+      });
+    },
+  };
+}
+
+function useBookie() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const getSignedBookie = async () => {
+    const bookieAddress = await contract.bookie();
+    const bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
+    return bookie.connect(library.getSigner());
+  };
 
   return {
     propose: async ({
@@ -94,10 +171,7 @@ const useDAIM = () => {
       betsClosedAt,
       readyForValidationAt,
     }) => {
-      const bookieAddress = await contract.bookie();
-      let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
-      bookie = bookie.connect(library.getSigner());
-
+      const bookie = getSignedBookie();
       await bookie[`propose(string,string,uint256,uint256)`](
         description,
         category,
@@ -106,18 +180,23 @@ const useDAIM = () => {
       );
     },
     placeBet: async ({ market, bet, value }) => {
-      const bookieAddress = await contract.bookie();
-      let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
-      bookie = bookie.connect(library.getSigner());
+      const bookie = getSignedBookie();
 
       return bookie.placeBet(market, bet, {
         value: ethers.utils.parseEther(value),
       });
     },
   };
-};
+}
 
-export { useDAIM, useActiveMarkets, useMarket, useMarketBets };
+export {
+  useActiveMarkets,
+  useMarket,
+  useMarketBets,
+  useTreasury,
+  useBookie,
+  useFACT,
+};
 
 function processMarket(market) {
   return {

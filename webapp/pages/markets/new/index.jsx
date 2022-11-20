@@ -1,11 +1,11 @@
 import React from 'react';
 import Select from 'react-select';
 import Button from '../../../components/Button';
-import { useDAIM } from '../../../smart-contracts/daim';
+import { useBookie } from '../../../smart-contracts/daim';
 import { Form, Input } from '../../../components/Form';
 
 const NewMarket = () => {
-  const daim = useDAIM();
+  const bookie = useBookie();
 
   const onSubmit = async ({
     description,
@@ -13,7 +13,7 @@ const NewMarket = () => {
     betsClosedAt,
     readyForValidationAt,
   }) => {
-    await daim.propose({
+    await bookie.propose({
       description,
       category,
       betsClosedAt,

@@ -20,8 +20,8 @@ contract FACTTest is Test {
     }
 
     function setUp() public {
-        treasury = new DAIMTreasury();
-        fact = new FACT(10, treasury);
+        treasury = new DAIMTreasury(10);
+        fact = treasury.fact();
     }
 
     function testMintByTreasury(address to, uint256 amount)

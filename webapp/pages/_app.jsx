@@ -48,10 +48,10 @@ const Menu = () => {
           active={activeMenu === 'Treasury'}
           onClick={() => setActiveMenu('Treasury')}
         >
-          Treasury
+          <Link href="/treasury">Treasury</Link>
         </MenuItem>
       </ul>
-      <ul className="flex items-center border-b-2 bg-zinc-800 dark:bg-white text-white dark:text-zinc-800">
+      <ul className="flex items-center border-b-2 bg-zinc-800 text-white dark:bg-white dark:text-zinc-800">
         <Switch value={activeMenu}>
           <Switch.Case value="Markets">
             <SubMenuItem active={router.asPath === '/markets/trending'}>
@@ -81,14 +81,6 @@ const Menu = () => {
             </SubMenuItem>
             <SubMenuItem active={router.asPath === '/validations/support'}>
               <Link href="/validations/support">Support</Link>
-            </SubMenuItem>
-          </Switch.Case>
-          <Switch.Case value="Treasury">
-            <SubMenuItem active={router.asPath === '/treasury/dashboard'}>
-              <Link href="/treasury/dashboard">Dashboard</Link>
-            </SubMenuItem>
-            <SubMenuItem active={router.asPath === '/treasury/trade'}>
-              <Link href="/treasury/trade">Trade</Link>
             </SubMenuItem>
           </Switch.Case>
         </Switch>

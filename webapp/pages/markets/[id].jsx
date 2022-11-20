@@ -1,23 +1,18 @@
 import { useRouter } from 'next/router';
 
-import { useDAIM, useMarket } from '../../smart-contracts/daim';
+import { useMarket } from '../../smart-contracts/daim';
 import Button from '../../components/Button';
 import { Form, Input } from '../../components/Form';
 import React from 'react';
 
 const MarketDetails = () => {
-  const daim = useDAIM();
   const router = useRouter();
   const { id } = router.query;
 
-  const { market, isLoading, error } = useMarket(id);
+  const { market, isLoading, error, placeBet } = useMarket(id);
 
   if (error) return <div>failed to load</div>;
   if (isLoading) return <div>loading...</div>;
-
-  const placeBet = ({ bet, value }) => {
-    daim.placeBet({ market: id, bet, value });
-  };
 
   return (
     <div>
