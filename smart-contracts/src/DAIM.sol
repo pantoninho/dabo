@@ -23,7 +23,7 @@ contract DAIM {
     DAIMarkets public bets;
 
     constructor() {
-        treasury = new DAIMTreasury(1000);
+        treasury = new DAIMTreasury(20 ether);
         fact = treasury.fact();
         factx = new FACTx(fact);
 

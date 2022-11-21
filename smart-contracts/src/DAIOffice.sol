@@ -12,6 +12,8 @@ import "./Errors.sol";
  * @notice  TODO: write this
  */
 contract DAIOffice {
+    event AssigningValidators(uint256 validatorsLength);
+    event PickedValidator(address validator, uint256 validatorWeight);
     // a validation represents a bet(s) chosen as correct by validators for a specific proposal.
     // if two validators select the same bet as correct, both will contribute to the same validation weight
     struct ProposalValidation {
@@ -42,8 +44,8 @@ contract DAIOffice {
     }
 
     uint256 private constant minMajorityWeightPercentage = 90;
-    uint256 private constant minValidators = 20;
-    uint256 public constant validatorsPercentagePerRound = 20;
+    uint256 private constant minValidators = 1;
+    uint256 public constant validatorsPercentagePerRound = 100;
     uint256 public constant minimumConsecutiveConsensus = 3;
     uint256 public constant maximumValidationRounds = 50;
 
@@ -69,11 +71,7 @@ contract DAIOffice {
         daim = _daim;
     }
 
-    function startValidationRound(uint256 proposalId)
-        external
-        ensureReadyForValidation(proposalId)
-        ensureEnoughValidators
-    {
+    function startValidationRound(uint256 proposalId) external {
         ValidationProcess storage process = validationProcesses[proposalId];
 
         if (process.validated) {
@@ -103,6 +101,7 @@ contract DAIOffice {
 
             veredictums[proposalId].validBetIds = validBetIds;
             veredictums[proposalId].unverifiable = unverifiable;
+            bets().removeActiveProposal(proposalId);
             return;
         }
 
@@ -152,6 +151,14 @@ contract DAIOffice {
         return _getPendingProposalValidations(msg.sender);
     }
 
+    function getProcessById(uint256 id)
+        external
+        view
+        returns (ValidationProcess memory process)
+    {
+        process = validationProcesses[id];
+    }
+
     function isWinner(uint256 betId) external view returns (bool) {
         DAIMarkets.Proposal memory proposal = bets().getProposalByBetId(betId);
 
@@ -176,6 +183,22 @@ contract DAIOffice {
         }
 
         return veredictums[proposalId].noConsensus;
+    }
+
+    function isProcessActive(uint256 proposalId) external view returns (bool) {
+        if (validationProcesses[proposalId].currentRound == 0) {
+            return false;
+        }
+
+        return !_isRoundClosed(_getCurrentRoundId(proposalId));
+    }
+
+    function getRoundValidators(uint256 proposalId, uint256 roundIndex)
+        external
+        view
+        returns (address[] memory)
+    {
+        return validationRounds[_getRoundId(proposalId, roundIndex)].validators;
     }
 
     function _isValidatorOf(address validator, uint256 proposalId)
@@ -234,12 +257,15 @@ contract DAIOffice {
             // if validation already exists. increment weight with user amount of FACTx
             validations[validationId].weight += validatorWeight;
         }
+
+        pendingValidationsByValidator[validator]--;
     }
 
     function _assignValidators(uint256 proposalId) internal {
         uint256 currentRoundId = _getCurrentRoundId(proposalId);
 
         address[] memory validators = factx().getOwners();
+        emit AssigningValidators(validators.length);
 
         if (validators.length == 0) {
             return;
@@ -260,6 +286,7 @@ contract DAIOffice {
             pendingValidationsByValidator[pickedValidator]++;
 
             uint256 validatorWeight = factx().balanceOf(pickedValidator);
+            emit PickedValidator(pickedValidator, validatorWeight);
             currentRound.totalWeight += validatorWeight;
             validatorsByRound[currentRoundId][
                 pickedValidator
@@ -276,7 +303,7 @@ contract DAIOffice {
         pure
         returns (uint256)
     {
-        return (totalValidators * validatorsPercentagePerRound) / 100 + 1;
+        return (totalValidators * validatorsPercentagePerRound + 1) / 100;
     }
 
     function _roundLimitReached(uint256 proposalId)

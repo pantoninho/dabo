@@ -42,8 +42,8 @@ contract DAIOfficeTest is Test {
         }
     }
 
-    function testStartValidationRound() public {
-        uint256 numberOfValidators = 2000; // max between 150000-200000 and gast cost is very high. how to increase this?
+    function testStartValidationRoundAssigning() public {
+        uint256 numberOfValidators = 1; // max between 150000-200000 and gast cost is very high. how to increase this?
         uint256[] memory betIds;
         address[] memory validators = _mockValidators(numberOfValidators);
 
@@ -357,14 +357,6 @@ contract DAIOfficeTest is Test {
             abi.encode(proposal)
         );
 
-        vm.mockCall(
-            address(betsMock),
-            abi.encodeWithSelector(
-                DAIMarkets.getProposalsToBeValidated.selector
-            ),
-            abi.encode(proposalsToBeValidated)
-        );
-
         for (uint256 i = 0; i < betIds.length; i++) {
             vm.mockCall(
                 address(betsMock),
@@ -383,7 +375,7 @@ contract DAIOfficeTest is Test {
         returns (uint256)
     {
         return
-            (totalValidators * office.validatorsPercentagePerRound()) / 100 + 1;
+            (totalValidators * office.validatorsPercentagePerRound() + 1) / 100;
     }
 
     function _mockProposal(

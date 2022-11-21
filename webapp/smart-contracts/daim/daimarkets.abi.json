@@ -109,12 +109,49 @@
         "type": "uint256"
       }
     ],
+    "name": "calculatePlayerRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "rewards",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
     "name": "calculateRewards",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "rewards",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActiveProposalIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -363,66 +400,6 @@
         "internalType": "struct DAIMarkets.Proposal",
         "name": "proposal",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getProposalsToBeValidated",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "betsClosedAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "readyForValidationAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "betPool",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "bets",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bool",
-            "name": "validated",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct DAIMarkets.Proposal[]",
-        "name": "proposalsToBeValidated",
-        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",

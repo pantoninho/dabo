@@ -188,7 +188,7 @@ contract DAIBookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DAIMarkets.calculateRewards.selector,
+                DAIMarkets.calculatePlayerRewards.selector,
                 player,
                 betId
             ),
@@ -221,7 +221,7 @@ contract DAIBookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DAIMarkets.calculateRewards.selector,
+                DAIMarkets.calculatePlayerRewards.selector,
                 player,
                 betId
             ),
@@ -254,7 +254,7 @@ contract DAIBookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DAIMarkets.calculateRewards.selector,
+                DAIMarkets.calculatePlayerRewards.selector,
                 player,
                 betId
             ),
@@ -284,7 +284,7 @@ contract DAIBookieTest is Test {
         vm.mockCall(
             address(bets),
             abi.encodeWithSelector(
-                DAIMarkets.calculateRewards.selector,
+                DAIMarkets.calculatePlayerRewards.selector,
                 player,
                 betId
             ),

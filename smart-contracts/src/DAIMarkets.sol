@@ -63,6 +63,24 @@ contract DAIMarkets {
         proposalIds.push(proposalId);
     }
 
+    function removeActiveProposal(uint256 id) external onlyOffice {
+        uint256 index;
+        bool found;
+        for (uint256 i = 0; i < proposalIds.length; i++) {
+            if (proposalIds[i] == id) {
+                index = i;
+                found = true;
+            }
+        }
+
+        if (!found) {
+            revert ProposalNotFound();
+        }
+
+        proposalIds[index] = proposalIds[proposalIds.length - 1];
+        proposalIds.pop();
+    }
+
     /**
      * @notice  Adds a bet and its stake to a proposal
      * @param   proposalId  the proposal id
@@ -174,7 +192,7 @@ contract DAIMarkets {
      * @param   betId  the bet id
      * @return  rewards  the reward
      */
-    function calculateRewards(address player, uint256 betId)
+    function calculatePlayerRewards(address player, uint256 betId)
         external
         view
         ensureBetExists(betId)
@@ -187,6 +205,27 @@ contract DAIMarkets {
         uint256 betStake = betStakes[betId];
         uint256 playerStake = playerStakes[player][betId];
         rewards = (totalStake * playerStake) / betStake;
+    }
+
+    /**
+     * @notice  Calculates a potential rewards on a placed bet
+     * @dev     This may be called while the bet is still ongoing. It calculates the rewards if the player's bet was a winner.
+     * @param   amount  amount staked
+     * @param   betId  the bet id
+     * @return  rewards  the reward
+     */
+    function calculateRewards(uint256 amount, uint256 betId)
+        external
+        view
+        ensureBetExists(betId)
+        returns (uint256 rewards)
+    {
+        uint256 proposalId = betToProposal[betId];
+        DAIMarkets.Proposal memory proposal = proposals[proposalId];
+
+        uint256 totalStake = proposal.betPool;
+        uint256 betStake = betStakes[betId];
+        rewards = (totalStake * amount) / betStake;
     }
 
     function getNumberOfProposals() external view returns (uint256) {
@@ -205,40 +244,13 @@ contract DAIMarkets {
         for (uint256 i = 0; i < proposalIds.length; i++) {
             proposal = proposals[proposalIds[i]];
 
-            // proposal already validated
-            if (proposal.validated) {
-                continue;
-            }
-
-            // bets already closed
-            if (proposal.betsClosedAt < block.timestamp) {
-                continue;
-            }
-
             activeProposals[counter] = proposal;
             counter++;
         }
     }
 
-    function getProposalsToBeValidated()
-        external
-        view
-        returns (Proposal[] memory proposalsToBeValidated)
-    {
-        Proposal memory proposal;
-        uint256 counter;
-
-        for (uint256 i = 0; i < proposalIds.length; i++) {
-            proposal = proposals[proposalIds[i]];
-
-            // proposal still not ready for validation
-            if (proposal.readyForValidationAt > block.timestamp) {
-                continue;
-            }
-
-            proposalsToBeValidated[counter] = proposal;
-            counter++;
-        }
+    function getActiveProposalIds() external view returns (uint256[] memory) {
+        return proposalIds;
     }
 
     function _placedBetId(uint256 proposalId, string memory bet)

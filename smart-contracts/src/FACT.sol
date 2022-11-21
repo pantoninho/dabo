@@ -25,7 +25,11 @@ contract FACT is ERC20 {
         treasury = _treasury;
     }
 
-    function mint(address account, uint256 amount) external onlyTreasury {
+    function mint(address account, uint256 amount)
+        external
+        onlyTreasury
+        ensureAvailableSupply(amount)
+    {
         _mint(account, amount);
     }
 

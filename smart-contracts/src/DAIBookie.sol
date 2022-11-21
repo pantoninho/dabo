@@ -101,7 +101,7 @@ contract DAIBookie {
             uint256 betId = claimables[i];
             bool isWinner = office().isWinner(betId);
             totalRewards += isWinner
-                ? bets().calculateRewards(msg.sender, betId)
+                ? bets().calculatePlayerRewards(msg.sender, betId)
                 : 0;
         }
 

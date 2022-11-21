@@ -173,7 +173,6 @@ const StakeFactBox = () => {
   const [fact, setFact] = React.useState(0);
   const { allowance, approveForStaking } = useFACT();
   const { stake, unstake } = useTreasury();
-  console.log(allowance);
 
   const onStake = (e) => {
     e.preventDefault();
@@ -191,7 +190,7 @@ const StakeFactBox = () => {
   };
 
   return (
-    <div className="flex rounded-lg border-2 border-zinc-800 dark:border-white">
+    <div className="flex-col flex flex-1 justify-between rounded-lg border-2 border-zinc-800 dark:border-white">
       <Form>
         <Input
           type="number"
@@ -201,21 +200,23 @@ const StakeFactBox = () => {
           min={0}
           onChange={setFact}
         />
-        {allowance == 0 ? (
-          <Button type="submit" onClick={onApprove}>
+      </Form>
+      {allowance == 0 ? (
+        <div className="flex justify-between gap-4 p-2">
+          <Button type="submit" className="flex-1" onClick={onApprove}>
             Approve FACT
           </Button>
-        ) : (
-          <div className="flex justify-around">
-            <Button type="submit" onClick={onStake}>
-              Stake {fact} FACT
-            </Button>
-            <Button type="submit" onClick={onUnstake}>
-              Unstake {fact} FACT
-            </Button>
-          </div>
-        )}
-      </Form>
+        </div>
+      ) : (
+        <div className="flex justify-between gap-4 p-2">
+          <Button type="submit" onClick={onStake}>
+            Stake FACT
+          </Button>
+          <Button type="submit" onClick={onUnstake}>
+            Unstake FACT
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

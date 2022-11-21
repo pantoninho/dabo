@@ -79,9 +79,6 @@ const Menu = () => {
             <SubMenuItem active={router.asPath === '/validations/pending'}>
               <Link href="/validations/pending">Pending</Link>
             </SubMenuItem>
-            <SubMenuItem active={router.asPath === '/validations/support'}>
-              <Link href="/validations/support">Support</Link>
-            </SubMenuItem>
           </Switch.Case>
         </Switch>
       </ul>

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useMarketBets } from '../smart-contracts/daim';
 import stringToColor from 'string-to-color';
 
@@ -6,14 +5,14 @@ const Market = ({
   id,
   description,
   category,
-  betsClosedAt,
   betPool,
   className,
+  actions,
+  hideShares,
 }) => {
   const { bets, isLoading, error } = useMarketBets(id);
 
-  if (error) return <div>failed to load</div>;
-  if (isLoading) return <div>loading...</div>;
+  if (error || isLoading) return <div></div>;
 
   return (
     <div
@@ -25,9 +24,9 @@ const Market = ({
         betPool={betPool}
       />
       <div className="mb-12"></div>
-      <BetSharesBars bets={bets} />
+      {hideShares || <BetSharesBars bets={bets} />}
       <div className="mb-8"></div>
-      <MarketActions id={id} betsClosedAt={betsClosedAt} />
+      {actions}
     </div>
   );
 };
@@ -52,30 +51,6 @@ const MarketHeader = ({ category, description, betPool }) => {
         </div>
       </div>
     </div>
-  );
-};
-
-const MarketActions = ({ id, betsClosedAt }) => {
-  return (
-    <div className="flex items-center justify-end">
-      <div className="flex flex-col gap-2">
-        <ButtonLink href={`/markets/${encodeURIComponent(id)}`}>
-          Place Bet
-        </ButtonLink>
-        <h5 className="text-xs">bets close at {betsClosedAt}</h5>
-      </div>
-    </div>
-  );
-};
-
-const ButtonLink = ({ children, href, className }) => {
-  return (
-    <Link
-      href={href}
-      className={`rounded-lg border-2 border-zinc-900 px-2 py-1 text-center hover:bg-zinc-800 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-zinc-900 ${className}`}
-    >
-      {children}
-    </Link>
   );
 };
 

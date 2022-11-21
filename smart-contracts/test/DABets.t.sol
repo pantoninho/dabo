@@ -125,8 +125,8 @@ contract DAIBookieTest is Test {
         uint256 bet2Id = bets.placeBet(proposalId, player2, "bet 2", p2stake);
         uint256 expectedRewards = uint256(p1stake) + uint256(p2stake);
 
-        uint256 p1Rewards = bets.calculateRewards(player1, bet1Id);
-        uint256 p2Rewards = bets.calculateRewards(player2, bet2Id);
+        uint256 p1Rewards = bets.calculatePlayerRewards(player1, bet1Id);
+        uint256 p2Rewards = bets.calculatePlayerRewards(player2, bet2Id);
 
         assertEq(p1Rewards, expectedRewards);
         assertEq(p2Rewards, expectedRewards);
@@ -150,13 +150,27 @@ contract DAIBookieTest is Test {
         uint256 bet1Id = bets.placeBet(proposalId, player1, bet, p1stake);
         uint256 bet2Id = bets.placeBet(proposalId, player2, bet, p2stake);
 
-        uint256 p1Rewards = bets.calculateRewards(player1, bet1Id);
-        uint256 p2Rewards = bets.calculateRewards(player2, bet2Id);
+        uint256 p1Rewards = bets.calculatePlayerRewards(player1, bet1Id);
+        uint256 p2Rewards = bets.calculatePlayerRewards(player2, bet2Id);
 
         uint256 betStake = uint256(p1stake) + uint256(p2stake);
 
         assertEq(p1Rewards, _calculateBetRewards(p1stake, betStake, betStake));
         assertEq(p2Rewards, _calculateBetRewards(p2stake, betStake, betStake));
+    }
+
+    function testGetActiveProposals() public {
+        vm.warp(1000);
+        DAIMarkets.Proposal memory proposal;
+        proposal.betsClosedAt = 800;
+        proposal.readyForValidationAt = 800;
+        hoax(address(bookie));
+        uint256 proposalId = bets.addProposal(proposal);
+
+        DAIMarkets.Proposal[] memory activeProposals = bets
+            .getActiveProposals();
+        assertEq(activeProposals.length, 1);
+        assertEq(activeProposals[0].id, proposalId);
     }
 
     function _calculateBetRewards(

@@ -1,7 +1,6 @@
 const ethers = require('ethers');
 const daimAbi = require('../smart-contracts/daim/daim.abi.json');
 const bookieAbi = require('../smart-contracts/daim/bookie.abi.json');
-const marketsAbi = require('../smart-contracts/daim/daimarkets.abi.json');
 
 const provider = new ethers.providers.JsonRpcProvider();
 const address = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
@@ -19,91 +18,117 @@ const accounts = [
   0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6n,
 ];
 
-// active markets
-addMarket({
-  description: 'Who will win the Qatar 2022 World Cup?',
-  category: 'Sports',
-  betsCloseAt: getTimeInUnixEpochSeconds(10),
-  readyForValidationAt: getTimeInUnixEpochSeconds(11),
-  proposer: accounts[0],
-  bets: ['portugal', 'brazil', 'spain', 'england'],
-});
-addMarket({
-  description: 'Who will win the 2022 US elections?',
-  category: 'Politics',
-  betsCloseAt: getTimeInUnixEpochSeconds(10),
-  readyForValidationAt: getTimeInUnixEpochSeconds(11),
-  proposer: accounts[1],
-  bets: ['democrats', 'republicans'],
-});
-addMarket({
-  description: 'Will ETH trade at $5k in 2022?',
-  category: 'Economy',
-  betsCloseAt: getTimeInUnixEpochSeconds(100),
-  readyForValidationAt: getTimeInUnixEpochSeconds(100),
-  proposer: accounts[2],
-  bets: ['yes', 'no'],
-});
-addMarket({
-  description: 'Will we live in economic recession in 2023?',
-  category: 'Economy',
-  betsCloseAt: getTimeInUnixEpochSeconds(365 * 2),
-  readyForValidationAt: getTimeInUnixEpochSeconds(365 * 2),
-  proposer: accounts[3],
-  bets: ['yes', 'no'],
-});
-addMarket({
-  description: 'How many hurricans will hit Florida in 2023?',
-  category: 'World Events',
-  betsCloseAt: getTimeInUnixEpochSeconds(365 * 2),
-  readyForValidationAt: getTimeInUnixEpochSeconds(365 * 2),
-  proposer: accounts[4],
-  bets: ['10', '20', '30', '50'],
-});
-addMarket({
-  description:
-    'Which month will the next album of Badjeka Badjouran be released?',
-  category: 'Arts',
-  betsCloseAt: getTimeInUnixEpochSeconds(100),
-  readyForValidationAt: getTimeInUnixEpochSeconds(100),
-  proposer: accounts[3],
-  bets: ['May', 'June', 'August', 'December', 'January', 'March'],
-});
+run();
 
-// markets ready for validation
-addMarket({
-  description: 'Who will win the 2021 portugal soccer cup?',
-  category: 'Sports',
-  betsCloseAt: getTimeInUnixEpochSeconds(-1),
-  readyForValidationAt: getTimeInUnixEpochSeconds(-1),
-  proposer: accounts[0],
-  bets: ['Sporting', 'Benfica', 'Penafiel', 'Vitoria Setubal'],
-});
-addMarket({
-  description: 'Will bitcoin hit new lows in 2022?',
-  category: 'Economy',
-  betsCloseAt: getTimeInUnixEpochSeconds(-1),
-  readyForValidationAt: getTimeInUnixEpochSeconds(-1),
-  proposer: accounts[2],
-  bets: ['yes', 'no'],
-});
-addMarket({
-  description: 'Will covid be gone in 2022?',
-  category: 'World Events',
-  betsCloseAt: getTimeInUnixEpochSeconds(-1),
-  readyForValidationAt: getTimeInUnixEpochSeconds(-1),
-  proposer: accounts[4],
-  bets: ['yes', 'no'],
-});
-addMarket({
-  description:
-    'How many albums will Johnson and Jonhson have released by 2022?',
-  category: 'Arts',
-  betsCloseAt: getTimeInUnixEpochSeconds(-1),
-  readyForValidationAt: getTimeInUnixEpochSeconds(-1),
-  proposer: accounts[4],
-  bets: ['2', '3', '4'],
-});
+async function run() {
+  await addMarket({
+    description: 'Who will win the 2021 portugal soccer cupélio?',
+    category: 'Sports',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[0],
+    bets: ['Sporting', 'Benfica', 'Penafiel', 'Vitoria Setubal'],
+  });
+  await addMarket({
+    description: 'Will bitcoin hit new lows in 2022?',
+    category: 'Economy',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[2],
+    bets: ['yes', 'no'],
+  });
+  await addMarket({
+    description: 'Will covid be gone in 2022?',
+    category: 'World Events',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[4],
+    bets: ['yes', 'no'],
+  });
+  await addMarket({
+    description:
+      'How many albums will Johnson and Jonhson have released by 2022?',
+    category: 'Arts',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[4],
+    bets: ['2', '3', '4'],
+  });
+  await addMarket({
+    description: 'Is this real life?',
+    category: 'Other',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[4],
+    bets: ['Yes', 'No'],
+  });
+  await addMarket({
+    description:
+      'Will Cristiano Ronaldo leave Manchester United before 20th September?',
+    category: 'Sports',
+    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    proposer: accounts[6],
+    bets: ['Yes', 'No'],
+  });
+  await addMarket({
+    description: 'What will happen on September 19th?',
+    category: 'World Events',
+    betsCloseAt: getTimeInUnixEpochSeconds(10 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(10 * 60),
+    proposer: accounts[8],
+    bets: ['Nothing', 'Pretty much nothing', 'Everything'],
+  });
+  await addMarket({
+    description: 'Who will win the Qatar 2022 World Cup?',
+    category: 'Sports',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[0],
+    bets: ['portugal', 'brazil', 'spain', 'england'],
+  });
+  await addMarket({
+    description: 'Who will win the 2022 US elections?',
+    category: 'Politics',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[1],
+    bets: ['democrats', 'republicans'],
+  });
+  await addMarket({
+    description: 'Will ETH trade at $5k in 2022?',
+    category: 'Economy',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[2],
+    bets: ['yes', 'no'],
+  });
+  await addMarket({
+    description: 'Will we live in economic recession in 2023?',
+    category: 'Economy',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[3],
+    bets: ['yes', 'no'],
+  });
+  await addMarket({
+    description: 'How many hurricans will hit Florida in 2023?',
+    category: 'World Events',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[4],
+    bets: ['10', '20', '30', '50'],
+  });
+  await addMarket({
+    description:
+      'Which month will the next album of Badjeka Badjouran be released?',
+    category: 'Arts',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[3],
+    bets: ['May', 'June', 'August', 'December', 'January', 'March'],
+  });
+}
 
 async function addMarket(market) {
   const contract = new ethers.Contract(address, daimAbi, provider);
@@ -122,7 +147,7 @@ async function addMarket(market) {
   const receipt = await tx.wait();
   const { args } = receipt.events[0];
 
-  await placeBets(args[0], market.bets);
+  await placeBets(args[0], market.bets, market);
 }
 
 async function placeBets(marketId, bets) {
@@ -136,10 +161,14 @@ async function placeBets(marketId, bets) {
 
     for (let j = 0; j < numberOfBets; j++) {
       const signerIndex = Math.floor(Math.random() * accounts.length);
-      bookie = bookie.connect(provider.getSigner(signerIndex));
-      const stake = (Math.random() * 5).toFixed(4);
+      const signer = provider.getSigner(signerIndex);
+      bookie = bookie.connect(signer);
+      const stake = (Math.random() * 10).toFixed(4);
 
-      console.log(`PLACING "${bet}" with stake ${stake}`);
+      console.log(
+        `${await signer.getAddress()} PLACING "${bet}" with stake ${stake}`
+      );
+
       const tx = await bookie.placeBet(marketId, bet, {
         value: ethers.utils.parseEther(stake),
       });
@@ -149,17 +178,6 @@ async function placeBets(marketId, bets) {
   }
 }
 
-async function getActiveMarkets() {
-  const contract = new ethers.Contract(address, daimAbi, provider);
-  const marketsAddress = await contract.bets();
-  const markets = new ethers.Contract(marketsAddress, marketsAbi, provider);
-
-  console.log(await markets.getActiveProposals());
-}
-
-// getActiveMarkets();
-run();
-
-function getTimeInUnixEpochSeconds(incrementDays) {
-  return Math.round(new Date().getTime() / 1000) + incrementDays * 24 * 60 * 60;
+function getTimeInUnixEpochSeconds(extraSeconds) {
+  return Math.round(new Date().getTime() / 1000) + extraSeconds;
 }

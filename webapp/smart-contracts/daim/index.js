@@ -1,11 +1,12 @@
 import { useWeb3React } from '@web3-react/core';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import daimAbi from './daim.abi.json';
 import bookieAbi from './bookie.abi.json';
 import marketsAbi from './daimarkets.abi.json';
 import treasuryAbi from './treasury.abi.json';
 import factAbi from './fact.abi.json';
 import factxAbi from './factx.abi.json';
+import officeAbi from './office.abi.json';
 import useSWR from 'swr';
 
 const address = process.env.NEXT_PUBLIC_DAIM_ADDRESS;
@@ -20,16 +21,22 @@ function useMarket(id) {
     const markets = new ethers.Contract(marketsAddress, marketsAbi, library);
     const market = await markets.getProposal(id);
 
-    return market;
+    return processMarket(market);
   };
 
   const { data, error } = useSWR(`getMarket(${id})`, fetcher(id));
 
   return {
-    market: data && processMarket(data),
+    market: data,
     isLoading: !error && !data,
     error: error,
-    placeBet: ({ bet, value }) => bookie.placeBet({ id, bet, value }),
+    placeBet: async ({ bet, value }) => bookie.placeBet({ id, bet, value }),
+    validate: async (betIds) => {
+      const officeAddress = await contract.office();
+      let office = new ethers.Contract(officeAddress, officeAbi, library);
+      office = office.connect(library.getSigner());
+      await office.validate(betIds.map((id) => BigNumber.from(id)));
+    },
   };
 }
 
@@ -42,13 +49,40 @@ function useActiveMarkets() {
     const markets = new ethers.Contract(marketsAddress, marketsAbi, library);
     const activeMarkets = await markets.getActiveProposals();
 
-    return activeMarkets;
+    return {
+      openMarkets: activeMarkets.filter(isOpen).map(processMarket),
+      validatingMarkets: activeMarkets
+        .filter(isInValidationProcess)
+        .map(processMarket),
+    };
   };
 
   const { data, error } = useSWR(`getActiveMarkets()`, fetcher);
 
   return {
-    activeMarkets: data && data.map(processMarket),
+    openMarkets: data && data.openMarkets,
+    validatingMarkets: data && data.validatingMarkets,
+    isLoading: !error && !data,
+    error: error,
+  };
+}
+
+function useMarketsReadyForValidation() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const marketsAddress = await contract.bets();
+    const markets = new ethers.Contract(marketsAddress, marketsAbi, library);
+    const marketsForValidation = await markets.getProposalsToBeValidated();
+
+    return marketsForValidation;
+  };
+
+  const { data, error } = useSWR(`getMarketsReadyForValidation()`, fetcher);
+
+  return {
+    marketsForValidation: data,
     isLoading: !error && !data,
     error: error,
   };
@@ -69,7 +103,7 @@ function useMarketBets(marketId) {
           markets.getBetDescription(betId),
           markets.getStakeOnBet(betId),
         ]);
-        return { description, stake };
+        return { id: betId.toHexString(), description, stake };
       })
     );
 
@@ -203,8 +237,6 @@ function useTreasury() {
       factx = factx.connect(library.getSigner());
       const address = await library.getSigner().getAddress();
 
-      console.log('in ether:', ethers.utils.parseEther(fact.toString()));
-
       await factx.deposit(ethers.utils.parseEther(fact.toString()), address);
     },
     unstake: async (fact) => {
@@ -239,7 +271,7 @@ function useBookie() {
       betsClosedAt,
       readyForValidationAt,
     }) => {
-      const bookie = getSignedBookie();
+      const bookie = await getSignedBookie();
       await bookie[`propose(string,string,uint256,uint256)`](
         description,
         category,
@@ -257,6 +289,74 @@ function useBookie() {
   };
 }
 
+function useValidationProcess(id) {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const officeAddress = await contract.office();
+    const office = new ethers.Contract(officeAddress, officeAbi, library);
+
+    const process = await office.getProcessById(id);
+    const isActive = await office.isProcessActive(id);
+    return processValidationProcess({ ...process, isActive });
+  };
+
+  const { data, error } = useSWR(`getValidationProcess(${id})`, fetcher);
+
+  return {
+    process: data,
+    isLoading: !error && !data,
+    error,
+    startValidationRound: async () => {
+      const officeAddress = await contract.office();
+      let office = new ethers.Contract(officeAddress, officeAbi, library);
+      office = office.connect(library.getSigner());
+
+      return office.startValidationRound(id);
+    },
+  };
+}
+
+function usePendingValidationsForSelf() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const officeAddress = await contract.office();
+    let office = new ethers.Contract(officeAddress, officeAbi, library);
+    office = office.connect(library.getSigner());
+    const pendingProposalIds = await office.getPendingProposalValidations();
+
+    const pendingProposals = await Promise.all(
+      pendingProposalIds
+        .filter((id) => !id.eq(0))
+        .map(async (id) => {
+          console.log('mapping', id);
+          const marketsAddress = await contract.bets();
+          const markets = new ethers.Contract(
+            marketsAddress,
+            marketsAbi,
+            library
+          );
+          const market = await markets.getProposal(id);
+
+          return processMarket(market);
+        })
+    );
+
+    return pendingProposals;
+  };
+
+  const { data, error } = useSWR(`getPendingValidations()`, fetcher);
+
+  return {
+    pendingValidations: data,
+    isLoading: !error && !data,
+    error,
+  };
+}
+
 export {
   useActiveMarkets,
   useMarket,
@@ -265,6 +365,9 @@ export {
   useBookie,
   useFACT,
   useFACTx,
+  useMarketsReadyForValidation,
+  useValidationProcess,
+  usePendingValidationsForSelf,
 };
 
 function processMarket(market) {
@@ -279,10 +382,26 @@ function processMarket(market) {
   };
 }
 
-function timestampToLocalizedString(timestamp) {
+function processValidationProcess(validationProcess) {
+  return {
+    ...validationProcess,
+    consecutiveConsensus: validationProcess.consecutiveConsensus.toNumber(),
+    currentRound: validationProcess.currentRound.toNumber(),
+  };
+}
+
+export function timestampToLocalizedString(timestamp) {
   return new Date(timestamp * 1000).toLocaleString();
 }
 
-function localizedStringToTimestamp(dateString) {
+export function localizedStringToTimestamp(dateString) {
   return Math.round(new Date(dateString).getTime() / 1000);
+}
+
+function isOpen(market) {
+  return market.betsClosedAt > new Date().getTime() / 1000;
+}
+
+function isInValidationProcess(market) {
+  return market.readyForValidationAt < new Date().getTime() / 1000;
 }
