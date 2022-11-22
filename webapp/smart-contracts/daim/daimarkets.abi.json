@@ -1,0 +1,461 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract DAIM",
+        "name": "_daim",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "BetNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientStake",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProposalNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betsClosedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyForValidationAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betPool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "bets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "validated",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DAIMarkets.Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      }
+    ],
+    "name": "addProposal",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "calculatePlayerRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "rewards",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "calculateRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "rewards",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActiveProposalIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActiveProposals",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betsClosedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyForValidationAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betPool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "bets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "validated",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DAIMarkets.Proposal[]",
+        "name": "activeProposals",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getBetDescription",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNumberOfProposals",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPlayerStakeOnBet",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stake",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProposal",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betsClosedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyForValidationAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betPool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "bets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "validated",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DAIMarkets.Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProposalByBetId",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betsClosedAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "readyForValidationAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "betPool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "bets",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "validated",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DAIMarkets.Proposal",
+        "name": "proposal",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getStakeOnBet",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stake",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "bet",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stake",
+        "type": "uint256"
+      }
+    ],
+    "name": "placeBet",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "betId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
