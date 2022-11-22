@@ -206,7 +206,17 @@ contract DAIOffice {
         view
         returns (bool isValidator)
     {
-        return validatorsByRound[_getCurrentRoundId(proposalId)][validator] > 0;
+        if (validationProcesses[proposalId].currentRound == 0) {
+            return false;
+        }
+
+        uint256 currentRound = _getCurrentRoundId(proposalId);
+
+        if (_isRoundClosed(currentRound)) {
+            return false;
+        }
+
+        return validatorsByRound[currentRound][validator] > 0;
     }
 
     function _getPendingProposalValidations(address validator)

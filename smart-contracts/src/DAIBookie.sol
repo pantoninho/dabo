@@ -174,7 +174,17 @@ contract DAIBookie {
         returns (uint256 betId)
     {
         betId = bets().placeBet(proposalId, player, bet, stake);
-        betsToClaim[player].push(betId);
+
+        bool found;
+        for (uint256 i = 0; i < betsToClaim[player].length; i++) {
+            if (betsToClaim[player][i] == betId) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            betsToClaim[player].push(betId);
+        }
     }
 
     modifier ensureEnoughStake(uint256 stake) {

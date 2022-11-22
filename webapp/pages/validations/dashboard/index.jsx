@@ -12,7 +12,6 @@ import { Form } from '../../../components/Form';
 const ValidationsDashboard = () => {
   const { pendingValidations, isLoading, error } =
     usePendingValidationsForSelf();
-  console.log({ error });
 
   if (error || isLoading) return <div></div>;
 

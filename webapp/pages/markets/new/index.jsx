@@ -74,12 +74,12 @@ const NewMarketForm = ({ onSubmit }) => {
         onChange={setReadyForValidationAt}
         value={readyForValidationAt}
       />
-      <div className="flex items-center rounded-lg bg-zinc-800 dark:bg-white">
+      <div className="flex items-center rounded-md bg-zinc-800 dark:bg-white">
         <label className="px-4 py-2 text-white dark:text-zinc-800">
           Category
         </label>
         <Select
-          className="flex-1 rounded-lg border-2 border-zinc-800 bg-white dark:border-white dark:bg-zinc-800"
+          className="flex-1 rounded-md border-2 border-zinc-800 bg-white dark:border-white dark:bg-zinc-800"
           defaultValue={category}
           onChange={setCategory}
           options={categories}

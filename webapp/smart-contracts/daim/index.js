@@ -289,6 +289,64 @@ function useBookie() {
   };
 }
 
+function useActiveBets() {
+  const { library } = useWeb3React();
+  const contract = new ethers.Contract(address, daimAbi, library);
+
+  const fetcher = async () => {
+    const bookieAddress = await contract.bookie();
+    let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
+    const marketsAddress = await contract.bets();
+    let markets = new ethers.Contract(marketsAddress, marketsAbi, library);
+    const officeAddress = await contract.office();
+    const office = new ethers.Contract(officeAddress, officeAbi, library);
+
+    bookie = bookie.connect(library.getSigner());
+    const address = await library.getSigner().getAddress();
+    let activeBets = await bookie.getActiveBets();
+    activeBets = await Promise.all(
+      activeBets.map(async (betId) => {
+        const market = await markets.getProposalByBetId(betId);
+        const process = await office.getProcessById(market.id);
+        const description = await markets.getBetDescription(betId);
+        const stake = await markets.getPlayerStakeOnBet(address, betId);
+        const isWinner = await office.isWinner(betId);
+        const rewards = await markets.calculatePlayerRewards(address, betId);
+
+        return {
+          market: processMarket(market),
+          description,
+          stake: ethers.utils.formatEther(stake.toString()),
+          isWinner,
+          rewards: ethers.utils.formatEther(rewards.toString()),
+          process,
+        };
+      })
+    );
+
+    return {
+      activeBets,
+      pendingRewards: activeBets.filter((bet) => bet.process.validated),
+    };
+  };
+
+  const { data, error } = useSWR(`getActiveBets()`, fetcher);
+
+  return {
+    activeBets: data && data.activeBets,
+    pendingRewards: data && data.pendingRewards,
+    isLoading: !error && !data,
+    error,
+    claimRewards: async () => {
+      const bookieAddress = await contract.bookie();
+      let bookie = new ethers.Contract(bookieAddress, bookieAbi, library);
+      bookie = bookie.connect(library.getSigner());
+
+      return bookie.claimRewards();
+    },
+  };
+}
+
 function useValidationProcess(id) {
   const { library } = useWeb3React();
   const contract = new ethers.Contract(address, daimAbi, library);
@@ -326,26 +384,30 @@ function usePendingValidationsForSelf() {
     const officeAddress = await contract.office();
     let office = new ethers.Contract(officeAddress, officeAbi, library);
     office = office.connect(library.getSigner());
-    const pendingProposalIds = await office.getPendingProposalValidations();
+    try {
+      const pendingProposalIds = await office.getPendingProposalValidations();
 
-    const pendingProposals = await Promise.all(
-      pendingProposalIds
-        .filter((id) => !id.eq(0))
-        .map(async (id) => {
-          console.log('mapping', id);
-          const marketsAddress = await contract.bets();
-          const markets = new ethers.Contract(
-            marketsAddress,
-            marketsAbi,
-            library
-          );
-          const market = await markets.getProposal(id);
+      const pendingProposals = await Promise.all(
+        pendingProposalIds
+          .filter((id) => !id.eq(0))
+          .map(async (id) => {
+            const marketsAddress = await contract.bets();
+            const markets = new ethers.Contract(
+              marketsAddress,
+              marketsAbi,
+              library
+            );
+            const market = await markets.getProposal(id);
 
-          return processMarket(market);
-        })
-    );
+            return processMarket(market);
+          })
+      );
 
-    return pendingProposals;
+      return pendingProposals;
+    } catch (error) {
+      console.log('error:', error);
+      return [];
+    }
   };
 
   const { data, error } = useSWR(`getPendingValidations()`, fetcher);
@@ -368,6 +430,7 @@ export {
   useMarketsReadyForValidation,
   useValidationProcess,
   usePendingValidationsForSelf,
+  useActiveBets,
 };
 
 function processMarket(market) {

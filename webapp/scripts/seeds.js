@@ -22,26 +22,26 @@ run();
 
 async function run() {
   await addMarket({
-    description: 'Who will win the 2021 portugal soccer cupélio?',
+    description: 'Who will win the 2021 portugal soccer cup?',
     category: 'Sports',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[0],
     bets: ['Sporting', 'Benfica', 'Penafiel', 'Vitoria Setubal'],
   });
   await addMarket({
     description: 'Will bitcoin hit new lows in 2022?',
     category: 'Economy',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[2],
     bets: ['yes', 'no'],
   });
   await addMarket({
     description: 'Will covid be gone in 2022?',
     category: 'World Events',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[4],
     bets: ['yes', 'no'],
   });
@@ -49,16 +49,16 @@ async function run() {
     description:
       'How many albums will Johnson and Jonhson have released by 2022?',
     category: 'Arts',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[4],
     bets: ['2', '3', '4'],
   });
   await addMarket({
     description: 'Is this real life?',
     category: 'Other',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
     proposer: accounts[4],
     bets: ['Yes', 'No'],
   });
@@ -66,16 +66,16 @@ async function run() {
     description:
       'Will Cristiano Ronaldo leave Manchester United before 20th September?',
     category: 'Sports',
-    betsCloseAt: getTimeInUnixEpochSeconds(3 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(3 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
     proposer: accounts[6],
     bets: ['Yes', 'No'],
   });
   await addMarket({
     description: 'What will happen on September 19th?',
     category: 'World Events',
-    betsCloseAt: getTimeInUnixEpochSeconds(10 * 60),
-    readyForValidationAt: getTimeInUnixEpochSeconds(10 * 60),
+    betsCloseAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(4 * 24 * 60 * 60),
     proposer: accounts[8],
     bets: ['Nothing', 'Pretty much nothing', 'Everything'],
   });
@@ -154,27 +154,32 @@ async function placeBets(marketId, bets) {
   const contract = new ethers.Contract(address, daimAbi, provider);
   const bookieAddress = await contract.bookie();
   let bookie = new ethers.Contract(bookieAddress, bookieAbi, provider);
-  const numberOfBets = 10;
+  let numberOfBets = 50;
 
-  for (let i = 0; i < bets.length; i++) {
-    const bet = bets[i];
+  while (numberOfBets > 0) {
+    const bet = bets[Math.floor(Math.random() * bets.length)];
+    const signer = provider.getSigner(
+      Math.floor(Math.random() * accounts.length)
+    );
+    bookie = bookie.connect(signer);
+    const stake = (Math.random() * Math.random() * 15).toFixed(10);
 
-    for (let j = 0; j < numberOfBets; j++) {
-      const signerIndex = Math.floor(Math.random() * accounts.length);
-      const signer = provider.getSigner(signerIndex);
-      bookie = bookie.connect(signer);
-      const stake = (Math.random() * 10).toFixed(4);
+    console.log(
+      `${await signer.getAddress()} PLACING "${bet}" with stake ${stake}`
+    );
 
-      console.log(
-        `${await signer.getAddress()} PLACING "${bet}" with stake ${stake}`
-      );
-
+    try {
       const tx = await bookie.placeBet(marketId, bet, {
         value: ethers.utils.parseEther(stake),
       });
-
       tx.wait();
+    } catch (error) {
+      const revertData = error.error.error.data;
+      const decodedError = bookie.interface.parseError(revertData);
+      console.log('ERROR:', decodedError.name); // "seriouserror"
     }
+
+    numberOfBets--;
   }
 }
 

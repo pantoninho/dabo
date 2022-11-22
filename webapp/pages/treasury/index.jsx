@@ -33,7 +33,7 @@ export default TreasuryDashboard;
 
 const TreasuryStats = ({ balance, issuedFacts, stakedFacts }) => {
   return (
-    <div className="flex min-w-fit flex-1 flex-wrap items-center justify-center gap-16 rounded-lg border-2 border-zinc-800 py-4 px-8 dark:border-white">
+    <div className="flex min-w-fit flex-1 flex-wrap items-center justify-center gap-16 rounded-md border-2 border-zinc-800 py-4 px-8 dark:border-white">
       <DashboardStat value={issuedFacts} label="Issued Facts" />
       <DashboardStat value={balance} label="ETH in Treasury" />
       <DashboardStat value={balance / issuedFacts} label="ETH/FACT" />
@@ -65,7 +65,7 @@ const InitTreasury = ({ initialize }) => {
   };
 
   return (
-    <div className="flex-col flex items-center justify-center gap-4 rounded-lg border-2 border-zinc-800 py-4 px-8 dark:border-white">
+    <div className="flex-col flex items-center justify-center gap-4 rounded-md border-2 border-zinc-800 py-4 px-8 dark:border-white">
       <div className="text-xl">Initialize Treasury</div>
       <div className="text-sm">
         Treasury may be initialized by buying FACT with ETH.
@@ -135,7 +135,7 @@ const BuyFactBox = () => {
   };
 
   return (
-    <div className="flex flex-1 rounded-lg border-2 border-zinc-800 dark:border-white">
+    <div className="flex flex-1 rounded-md border-2 border-zinc-800 dark:border-white">
       <Form>
         <Input
           type="number"
@@ -190,7 +190,7 @@ const StakeFactBox = () => {
   };
 
   return (
-    <div className="flex-col flex flex-1 justify-between rounded-lg border-2 border-zinc-800 dark:border-white">
+    <div className="flex-col flex flex-1 justify-between rounded-md border-2 border-zinc-800 dark:border-white">
       <Form>
         <Input
           type="number"

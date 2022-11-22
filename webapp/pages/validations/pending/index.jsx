@@ -47,8 +47,6 @@ const MarketActions = ({ id, readyForValidationAt }) => {
   const { process, isLoading, error, startValidationRound } =
     useValidationProcess(id);
 
-  console.log({ error });
-
   if (isLoading || error) return <div />;
 
   const isButtonDisabled = process.isActive;

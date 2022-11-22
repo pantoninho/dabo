@@ -1,7 +1,7 @@
 import { useActiveMarkets } from '../../../smart-contracts/daim';
 import Market from '../../../components/Market';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
-import Link from 'next/link';
+import ButtonLink from '../../../components/ButtonLink';
 
 const TrendingMarkets = () => {
   const { openMarkets, isLoading, error } = useActiveMarkets();
@@ -53,13 +53,3 @@ const MarketActions = ({ id, betsClosedAt }) => {
   );
 };
 
-const ButtonLink = ({ children, href, className }) => {
-  return (
-    <Link
-      href={href}
-      className={`rounded-lg border-2 border-zinc-900 px-2 py-1 text-center hover:bg-zinc-800 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-zinc-900 ${className}`}
-    >
-      {children}
-    </Link>
-  );
-};

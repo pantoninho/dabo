@@ -1,5 +1,6 @@
 import { useMarketBets } from '../smart-contracts/daim';
 import stringToColor from 'string-to-color';
+import { FixedNumber } from 'ethers';
 
 const Market = ({
   id,
@@ -16,7 +17,7 @@ const Market = ({
 
   return (
     <div
-      className={`rounded-lg border-2 border-zinc-800 p-4 dark:border-white ${className}`}
+      className={`rounded-md border-2 border-zinc-800 p-4 dark:border-white ${className}`}
     >
       <MarketHeader
         description={description}
@@ -113,7 +114,7 @@ const ColorBarCaption = ({ label, color, share }) => {
       </div>
       <div className="">
         <span className="text-xs font-thin tracking-widest">
-          {label.toUpperCase()}
+          {label.toUpperCase()}({share}%)
         </span>
       </div>
     </div>
@@ -125,11 +126,18 @@ const ColorBarCaptions = ({ children }) => {
 };
 
 const toColorBar = (bet, i, bets) => {
-  const totalStake = bets.reduce((acc, bet) => bet.stake.add(acc), 0);
+  let totalStake = bets.reduce((acc, bet) => bet.stake.add(acc), 0);
+
+  const stakeShare = FixedNumber.fromString(bet.stake.toString());
+  totalStake = FixedNumber.fromString(totalStake.toString());
 
   return {
     label: bet.description,
     color: stringToColor(bet.description),
-    stakeShare: bet.stake.mul(100).div(totalStake).toNumber(),
+    stakeShare: stakeShare
+      .mulUnsafe(FixedNumber.from(100))
+      .divUnsafe(totalStake)
+      .round(0)
+      .toUnsafeFloat(),
   };
 };
