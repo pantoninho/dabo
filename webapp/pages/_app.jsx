@@ -39,10 +39,16 @@ const Menu = () => {
           Rewards
         </MenuItem>
         <MenuItem
+          active={activeMenu === 'Maintenance'}
+          onClick={() => setActiveMenu('Maintenance')}
+        >
+          <Link href="/maintenance">Maintenance</Link>
+        </MenuItem>
+        <MenuItem
           active={activeMenu === 'Validations'}
           onClick={() => setActiveMenu('Validations')}
         >
-          Validations
+          <Link href="/validations">Validations</Link>
         </MenuItem>
         <MenuItem
           active={activeMenu === 'Treasury'}
@@ -57,9 +63,6 @@ const Menu = () => {
             <SubMenuItem active={router.asPath === '/markets/trending'}>
               <Link href="/markets/trending">Trending</Link>
             </SubMenuItem>
-            <SubMenuItem active={router.asPath === '/markets/search'}>
-              <Link href="/markets/search">Search</Link>
-            </SubMenuItem>
             <SubMenuItem active={router.asPath === '/markets/new'}>
               <Link href="/markets/new">New</Link>
             </SubMenuItem>
@@ -70,14 +73,6 @@ const Menu = () => {
             </SubMenuItem>
             <SubMenuItem active={router.asPath === '/rewards/claim'}>
               <Link href="/rewards/claim">Claim</Link>
-            </SubMenuItem>
-          </Switch.Case>
-          <Switch.Case value="Validations">
-            <SubMenuItem active={router.asPath === '/validations/dashboard'}>
-              <Link href="/validations/dashboard">Dashboard</Link>
-            </SubMenuItem>
-            <SubMenuItem active={router.asPath === '/validations/pending'}>
-              <Link href="/validations/pending">Pending</Link>
             </SubMenuItem>
           </Switch.Case>
         </Switch>

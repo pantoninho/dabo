@@ -44,8 +44,8 @@ contract DAIOffice {
     }
 
     uint256 private constant minMajorityWeightPercentage = 90;
-    uint256 private constant minValidators = 1;
-    uint256 public constant validatorsPercentagePerRound = 100;
+    uint256 private constant minValidators = 2;
+    uint256 public constant validatorsPercentagePerRound = 50;
     uint256 public constant minimumConsecutiveConsensus = 3;
     uint256 public constant maximumValidationRounds = 50;
 

@@ -30,7 +30,9 @@ function useMarket(id) {
     market: data,
     isLoading: !error && !data,
     error: error,
-    placeBet: async ({ bet, value }) => bookie.placeBet({ id, bet, value }),
+    placeBet: async ({ bet, value }) => {
+      return bookie.placeBet({ market: id, bet, value });
+    },
     validate: async (betIds) => {
       const officeAddress = await contract.office();
       let office = new ethers.Contract(officeAddress, officeAbi, library);
@@ -280,7 +282,7 @@ function useBookie() {
       );
     },
     placeBet: async ({ market, bet, value }) => {
-      const bookie = getSignedBookie();
+      const bookie = await getSignedBookie();
 
       return bookie.placeBet(market, bet, {
         value: ethers.utils.parseEther(value),
@@ -405,7 +407,6 @@ function usePendingValidationsForSelf() {
 
       return pendingProposals;
     } catch (error) {
-      console.log('error:', error);
       return [];
     }
   };

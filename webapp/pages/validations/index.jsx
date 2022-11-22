@@ -2,12 +2,12 @@ import {
   useMarket,
   useMarketBets,
   usePendingValidationsForSelf,
-} from '../../../smart-contracts/daim';
-import Market from '../../../components/Market';
+} from '../../smart-contracts/daim';
+import Market from '../../components/Market';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
-import Button from '../../../components/Button';
+import Button from '../../components/Button';
 import React from 'react';
-import { Form } from '../../../components/Form';
+import { Form } from '../../components/Form';
 
 const ValidationsDashboard = () => {
   const { pendingValidations, isLoading, error } =

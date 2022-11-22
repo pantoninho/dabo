@@ -21,7 +21,13 @@ const NewMarket = () => {
     });
   };
 
-  return <NewMarketForm onSubmit={onSubmit} />;
+  return (
+    <div className="flex justify-center p-8">
+      <div className="flex rounded-md border-2 border-zinc-800 p-2 dark:border-white">
+        <NewMarketForm onSubmit={onSubmit} />
+      </div>
+    </div>
+  );
 };
 
 export default NewMarket;
@@ -79,14 +85,21 @@ const NewMarketForm = ({ onSubmit }) => {
           Category
         </label>
         <Select
-          className="flex-1 rounded-md border-2 border-zinc-800 bg-white dark:border-white dark:bg-zinc-800"
+          className="text-inc-800 flex-1 rounded-md border-2 border-zinc-800 bg-white dark:border-white dark:bg-zinc-800"
           defaultValue={category}
           onChange={setCategory}
+          value={category}
           options={categories}
+          styles={{
+            menuList: (baseStyles) => ({
+              ...baseStyles,
+              color: 'black',
+            }),
+          }}
         />
       </div>
 
-      <Button className="w-32 self-center" onClick={onButtonClick}>
+      <Button className="mt-8 flex-1" onClick={onButtonClick}>
         Create Market
       </Button>
     </Form>

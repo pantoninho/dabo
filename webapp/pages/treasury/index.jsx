@@ -9,7 +9,7 @@ const TreasuryDashboard = () => {
   const { totalSupply: factxSupply } = useFACTx();
 
   return (
-    <div className="flex-col flex items-center">
+    <div className="flex flex-col items-center">
       <div className="mt-4"></div>
       {isPriceSet ? (
         <div className="flex flex-wrap gap-16 px-16 py-8">
@@ -44,7 +44,7 @@ const TreasuryStats = ({ balance, issuedFacts, stakedFacts }) => {
 
 const DashboardStat = ({ value, label }) => {
   return (
-    <div className="flex-col flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center">
       <div className="text-6xl">{value}</div>
       <div>
         <h3 className="text-sm tracking-widest">{label.toUpperCase()}</h3>
@@ -65,7 +65,7 @@ const InitTreasury = ({ initialize }) => {
   };
 
   return (
-    <div className="flex-col flex items-center justify-center gap-4 rounded-md border-2 border-zinc-800 py-4 px-8 dark:border-white">
+    <div className="flex flex-col items-center justify-center gap-4 rounded-md border-2 border-zinc-800 py-4 px-8 dark:border-white">
       <div className="text-xl">Initialize Treasury</div>
       <div className="text-sm">
         Treasury may be initialized by buying FACT with ETH.
@@ -75,7 +75,6 @@ const InitTreasury = ({ initialize }) => {
         <Input
           required
           min={1}
-          step={0.001}
           labelClassName="w-20 text-center"
           type="number"
           label={'FACT'}
@@ -84,8 +83,6 @@ const InitTreasury = ({ initialize }) => {
         />
         <Input
           required
-          min={0.001}
-          step={0.001}
           labelClassName="w-20 text-center"
           type="number"
           label={'ETH'}
@@ -153,12 +150,12 @@ const BuyFactBox = () => {
           min={0}
           onChange={setEthAndUpdate}
         />
-        <div className="flex justify-around">
+        <div className="flex justify-between">
           <Button type="submit" onClick={onBuy}>
-            Buy {fact} FACT
+            Buy FACT
           </Button>
           <Button type="submit" onClick={onSell}>
-            Sell {fact} FACT
+            Sell FACT
           </Button>
         </div>
         <div className="self-end text-sm font-thin">
@@ -190,7 +187,7 @@ const StakeFactBox = () => {
   };
 
   return (
-    <div className="flex-col flex flex-1 justify-between rounded-md border-2 border-zinc-800 dark:border-white">
+    <div className="flex flex-1 flex-col justify-between rounded-md border-2 border-zinc-800 dark:border-white">
       <Form>
         <Input
           type="number"

@@ -47,7 +47,7 @@ const MarketHeader = ({ category, description, betPool }) => {
         <div className="flex-0">
           <h3 className="text-center text-lg">{betPool} ETH</h3>
           <h3 className="text-center text-xs font-thin tracking-widest">
-            BET POOL
+            MARKET POOL
           </h3>
         </div>
       </div>

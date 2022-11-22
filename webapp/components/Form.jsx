@@ -2,7 +2,7 @@ import React from 'react';
 
 export const Form = ({ children }) => {
   return (
-    <form className="flex-col flex flex-1 gap-4 py-4 px-2">{children}</form>
+    <form className="flex flex-1 flex-col gap-4 py-4 px-2">{children}</form>
   );
 };
 
@@ -26,7 +26,7 @@ export const Input = ({
         {label}
       </label>
       <input
-        className="flex-1 rounded-md border-2 border-zinc-800 bg-white px-4 py-2 focus:outline-none dark:border-white dark:bg-zinc-800 dark:invalid:bg-red-500"
+        className="flex-1 rounded-md border-2 border-zinc-800 bg-white px-4 py-2 focus:outline-none dark:border-white dark:bg-zinc-800"
         id={name}
         required={required}
         min={min}

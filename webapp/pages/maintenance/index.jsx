@@ -1,10 +1,10 @@
+import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import {
   useActiveMarkets,
   useValidationProcess,
-} from '../../../smart-contracts/daim';
-import Market from '../../../components/Market';
-import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
-import Button from '../../../components/Button';
+} from '../../smart-contracts/daim';
+import Market from '../../components/Market';
+import Button from '../../components/Button';
 
 const PendingValidationMarkets = () => {
   const { validatingMarkets, openMarkets, isLoading, error } =
@@ -52,11 +52,11 @@ const MarketActions = ({ id, readyForValidationAt }) => {
   const isButtonDisabled = process.isActive;
   const buttonText = isButtonDisabled
     ? 'Validation Round Running'
-    : 'Start Validation Round';
+    : 'Update Validation Process';
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex-col flex gap-2">
+      <div className="flex flex-col gap-2">
         <h4>Ready for Validation At: {readyForValidationAt}</h4>
         <h4>Validation Round: {process.currentRound}</h4>
         <h4>Consecutive Consensus: {process.consecutiveConsensus}</h4>

@@ -35,7 +35,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[2],
-    bets: ['yes', 'no'],
+    bets: ['Yes', 'No'],
   });
   await addMarket({
     description: 'Will covid be gone in 2022?',
@@ -43,7 +43,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[4],
-    bets: ['yes', 'no'],
+    bets: ['Yes', 'No'],
   });
   await addMarket({
     description:
@@ -85,7 +85,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[0],
-    bets: ['portugal', 'brazil', 'spain', 'england'],
+    bets: ['Portugal', 'Brazil', 'Spain', 'England'],
   });
   await addMarket({
     description: 'Who will win the 2022 US elections?',
@@ -93,7 +93,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[1],
-    bets: ['democrats', 'republicans'],
+    bets: ['Democrats', 'Republicans'],
   });
   await addMarket({
     description: 'Will ETH trade at $5k in 2022?',
@@ -101,7 +101,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[2],
-    bets: ['yes', 'no'],
+    bets: ['Yes', 'No'],
   });
   await addMarket({
     description: 'Will we live in economic recession in 2023?',
@@ -109,7 +109,7 @@ async function run() {
     betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[3],
-    bets: ['yes', 'no'],
+    bets: ['Yes', 'No'],
   });
   await addMarket({
     description: 'How many hurricans will hit Florida in 2023?',
@@ -127,6 +127,24 @@ async function run() {
     readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
     proposer: accounts[3],
     bets: ['May', 'June', 'August', 'December', 'January', 'March'],
+  });
+
+  await addMarket({
+    description: 'Will SBF be federally indicted by EOY?',
+    category: 'Crypto',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[3],
+    bets: ['Yes', 'No'],
+  });
+
+  await addMarket({
+    description: 'Will Arbitrum airdrop a native token before 2023?',
+    category: 'Crypto',
+    betsCloseAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    readyForValidationAt: getTimeInUnixEpochSeconds(24 * 60 * 60),
+    proposer: accounts[3],
+    bets: ['Yes', 'No'],
   });
 }
 
